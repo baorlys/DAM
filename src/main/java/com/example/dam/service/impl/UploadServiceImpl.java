@@ -1,0 +1,82 @@
+package com.example.dam.service.impl;
+
+import com.example.dam.dto.UploadAssetDTO;
+import com.example.dam.enums.Format;
+import com.example.dam.enums.Type;
+import com.example.dam.input.AssetInput;
+import com.example.dam.input.ConfigurationInput;
+import com.example.dam.model.Asset;
+import com.example.dam.model.Client;
+import com.example.dam.model.Folder;
+import com.example.dam.service.UploadService;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
+@Service
+public class UploadServiceImpl implements UploadService {
+    private final String storageDirectory = "/path/to/storage";
+
+    @Override
+    public UploadAssetDTO upload(AssetInput assetInput) throws IOException {
+        Client client = checkConfiguration(assetInput.getConfiguration());
+        String publicId = UUID.randomUUID().toString();
+        Path filePath = Paths.get(storageDirectory, publicId + "-" + assetInput.getFile().getOriginalFilename());
+        Files.createDirectories(filePath.getParent());
+        Files.copy(assetInput.getFile().getInputStream(), filePath);
+        long bytes = assetInput.getFile().getSize();
+        Map attributes = buildUploadParams(assetInput.getOptions());
+        Asset asset = new Asset();
+        asset.setClient(client);
+        asset.setPublicId(publicId);
+        asset.setFormat(getFormat((String) attributes.get("format")));
+        asset.setBytes(bytes);
+        asset.setHeight((Integer) attributes.getOrDefault("height", 1000));
+        asset.setWidth((Integer) attributes.getOrDefault("width", 1000));
+        asset.setFolder((Folder) attributes.getOrDefault("asset_folder", null));
+        asset.setDisplayName((String) attributes.get("display_name"));
+        asset.setType((Type) attributes.get("type"));
+        asset.setPlaceholder((Boolean) attributes.getOrDefault("place_holder", false));
+        asset.setUrl(filePath.toString());
+        return new UploadAssetDTO();
+    }
+
+    public Format getFormat(String val) {
+        return Arrays.stream(Format.values())
+                .filter(f -> f.name().equalsIgnoreCase(val))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid format: " + val));
+    }
+
+
+    private Map<String, Object> buildUploadParams(Map<String, Object> options) {
+        if (options == null) {
+            options = Collections.emptyMap();
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("public_id", options.get("public_id"));
+        params.put("format", options.get("format"));
+        params.put("type", options.get("type"));
+        params.put("asset_folder", options.get("asset_folder"));
+        params.put("display_name", options.get("display_name"));
+        params.put("notification_url", options.get("notification_url"));
+        return params;
+    }
+
+
+    @Override
+    public UploadAssetDTO uploadLarge(AssetInput assetInput) {
+        return null;
+    }
+
+    public Client checkConfiguration(ConfigurationInput ci) {
+        if (ci.getApiKey() == null && ci.getApiSecret() == null && ci.getTenantId() == null) {
+            throw new SecurityException("Invalid credential");
+        }
+        return null;
+    }
+}
