@@ -5,10 +5,11 @@ import com.example.dam.enums.Format;
 import com.example.dam.enums.Type;
 import com.example.dam.input.AssetInput;
 import com.example.dam.input.ConfigurationInput;
-import com.example.dam.model.Asset;
-import com.example.dam.model.Folder;
-import com.example.dam.model.User;
+import com.example.dam.model.*;
+import com.example.dam.repository.CredentialRepository;
+import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.UploadService;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -18,27 +19,31 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class UploadServiceImpl implements UploadService {
-    private final String storageDirectory = "/path/to/storage";
+    private final String storageDirectory = "src/main/resources/storage/tenant-1";
+    private final CredentialRepository credentialRepository;
+    private final TenantRepository tenantRepository;
 
     @Override
     public UploadAssetDTO upload(AssetInput assetInput) throws IOException {
-        User user = checkConfiguration(assetInput.getConfiguration());
+//        checkConfiguration(assetInput.getTenantId(), assetInput.getApiKey());
         String publicId = UUID.randomUUID().toString();
         Path filePath = Paths.get(storageDirectory, publicId + "-" + assetInput.getFile().getOriginalFilename());
         Files.createDirectories(filePath.getParent());
         Files.copy(assetInput.getFile().getInputStream(), filePath);
         long bytes = assetInput.getFile().getSize();
-        Map attributes = buildUploadParams(assetInput.getOptions());
+        Map<? , ?> attributes = buildUploadParams(assetInput.getOptions());
         Asset asset = new Asset();
-        asset.setClient(user);
+        Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
+        asset.setTenant(tenant);
         asset.setPublicId(publicId);
         asset.setFormat(getFormat((String) attributes.get("format")));
         asset.setSize(bytes);
         asset.setHeight((Integer) attributes.getOrDefault("height", 1000));
         asset.setWidth((Integer) attributes.getOrDefault("width", 1000));
         asset.setFolder((Folder) attributes.getOrDefault("asset_folder", null));
-        asset.setDisplayName((String) attributes.get("display_name"));
+        asset.setDisplayName((String) attributes.getOrDefault("display_name", ""));
         asset.setType((Type) attributes.get("type"));
         asset.setPlaceholder((Boolean) attributes.getOrDefault("place_holder", false));
         asset.setUrl(filePath.toString());
@@ -53,11 +58,11 @@ public class UploadServiceImpl implements UploadService {
     }
 
 
-    private Map<String, Object> buildUploadParams(Map<String, Object> options) {
+    private Map<String, String> buildUploadParams(Map<String, String> options) {
         if (options == null) {
             options = Collections.emptyMap();
         }
-        Map<String, Object> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
         params.put("public_id", options.get("public_id"));
         params.put("format", options.get("format"));
         params.put("type", options.get("type"));
@@ -73,10 +78,4 @@ public class UploadServiceImpl implements UploadService {
         return null;
     }
 
-    public User checkConfiguration(ConfigurationInput ci) {
-        if (ci.getApiKey() == null && ci.getApiSecret() == null && ci.getTenantId() == null) {
-            throw new SecurityException("Invalid credential");
-        }
-        return null;
-    }
 }
