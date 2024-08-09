@@ -4,49 +4,61 @@ import com.example.dam.enums.Format;
 import com.example.dam.enums.ResourceType;
 import com.example.dam.enums.Type;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Data
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Asset {
     @Id
     @GeneratedValue
-    private UUID id;
+    UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    User client;
 
     @Column(nullable = false, unique = true)
-    private String publicId;
+    String publicId;
+
+    int width;
+    int height;
+
+    @Enumerated(EnumType.STRING)
+    Format format;
 
     @Column(nullable = false)
-    private String signature;
-
-    private int width;
-    private int height;
-    private Format format;
+    @Enumerated(EnumType.STRING)
+    ResourceType resourceType;
 
     @Column(nullable = false)
-    private ResourceType resourceType;
+    @CreatedDate
+    LocalDateTime createdAt;
+
+    @LastModifiedDate
+    LocalDateTime updatedAt;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    long size;
 
     @Column(nullable = false)
-    private long bytes;
+    Type type;
 
-    @Column(nullable = false)
-    private Type type;
-
-    private boolean placeholder;
-    private String url;
+    boolean placeholder;
+    String url;
+    String thumbnailUrl;
     @ManyToOne
-    @JoinColumn(name = "folder_id")
-    private Folder folder;
-    private String displayName;
-    private String originalFilename;
+    Folder folder;
+
+    String displayName;
+
+    String originalFilename;
 }

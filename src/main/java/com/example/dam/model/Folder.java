@@ -1,32 +1,39 @@
 package com.example.dam.model;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Data
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Folder {
     @Id
     @GeneratedValue
-    private UUID id;
+    UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    User client;
 
     @Column(nullable = false)
-    private String name;
+    String name;
 
     @ManyToOne
-    @JoinColumn(name = "parent_folder_id")
-    private Folder parent;
+    Folder parent;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreatedDate
+    LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    @LastModifiedDate
+    LocalDateTime updatedAt;
 }
