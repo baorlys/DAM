@@ -8,5 +8,5 @@ import java.util.Map;
 @Data
 public class AssetInput {
     MultipartFile file;
-    Map<String, String> options;
+    Map options;
 }
