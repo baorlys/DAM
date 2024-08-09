@@ -22,7 +22,7 @@ public class Permission {
     Tenant tenant;
 
     @ManyToOne
-    User client;
+    User user;
 
     @Enumerated(EnumType.STRING)
     Role role;
