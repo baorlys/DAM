@@ -1,5 +1,8 @@
 package com.example.dam.model;
 
+import com.example.dam.enums.Format;
+import com.example.dam.enums.ResourceType;
+import com.example.dam.enums.Type;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,7 +28,7 @@ public class Asset {
 
     private int width;
     private int height;
-    private String format;
+    private Format format;
 
     @Column(nullable = false)
     private ResourceType resourceType;

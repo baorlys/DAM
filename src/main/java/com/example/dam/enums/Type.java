@@ -1,4 +1,4 @@
-package com.example.dam.model;
+package com.example.dam.enums;
 
 public enum Type {
     UPLOAD,
