@@ -5,30 +5,22 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.CreatedDate;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Data
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuditLog {
+public class Tenant {
     @Id
     @GeneratedValue
     UUID id;
 
-    @ManyToOne
-    User client;
+    String name;
 
-    @Column(nullable = false)
-    String action;
+    @OneToMany(mappedBy = "tenant")
+    List<Credential> credentials;
 
-    @ManyToOne
-    private Asset asset;
-
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    LocalDateTime timestamp;
 }

@@ -1,30 +1,38 @@
 package com.example.dam.model;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Data
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Credential {
     @Id
     @GeneratedValue
-    private UUID id;
+    UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @CreatedBy
+    Tenant tenant;
 
     @Column(nullable = false, unique = true)
-    private String apiKey;
+    String apiKey;
 
     @Column(nullable = false, unique = true)
-    private String apiSecret;
+    String apiSecret;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreatedDate
+    LocalDateTime createdAt;
 
-    private LocalDateTime lastUsedAt;
+    LocalDateTime lastUsedAt;
 }

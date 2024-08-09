@@ -2,34 +2,35 @@ package com.example.dam.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Data
-public class Client {
+public class User {
     @Id
     @GeneratedValue
-    private UUID id;
+    UUID id;
 
     @Column(nullable = false, unique = true)
-    private String username;
+    String username;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    String email;
 
     @Column(nullable = false)
-    private String password;
+    String password;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreatedDate
+    LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    @LastModifiedDate
+    LocalDateTime updatedAt;
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+
 }
