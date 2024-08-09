@@ -21,7 +21,7 @@ public class Folder {
     UUID id;
 
     @ManyToOne
-    User client;
+    User user;
 
     @Column(nullable = false)
     String name;

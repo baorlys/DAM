@@ -6,5 +6,5 @@ import lombok.Data;
 public class ConfigurationInput {
     String tenantId;
     String apiKey;
-    String apiSecret;
+    String secretKey;
 }

@@ -24,7 +24,7 @@ public class Asset {
     UUID id;
 
     @ManyToOne
-    User client;
+    Tenant tenant;
 
     @Column(nullable = false, unique = true)
     String publicId;
