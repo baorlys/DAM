@@ -50,7 +50,6 @@ public class GetServiceTest {
         when(credentialRepository.findOne(Example.of(credential))).thenReturn(Optional.of(credential));
         when(assetRepository.findByPublicId(publicId)).thenReturn(null);
 
-        List<AssetDTO> assetResponse = getService.getAsset(publicId);
 
         verify(credentialRepository, times(1)).exists(Example.of(credential));
         verify(credentialRepository, times(1)).findOne(Example.of(credential));
