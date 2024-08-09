@@ -3,7 +3,6 @@ package com.example.dam.controller;
 import com.example.dam.dto.UploadAssetDTO;
 import com.example.dam.input.AssetInput;
 import com.example.dam.service.UploadService;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,11 +23,8 @@ public class UploadController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> upload(@RequestHeader("X-Tenant-ID") @NotEmpty String tenantId,
-                                 @RequestHeader("X-API-Key") @NotEmpty String apiKey,
-                                 @RequestHeader("X-Secret-Key") @NotEmpty String secretKey,
-                                 @ModelAttribute AssetInput assetInput) throws IOException {
-        String url = uploadService.upload(assetInput, tenantId, apiKey, secretKey);
-        return new ResponseEntity<>(url, HttpStatus.OK);
+    public ResponseEntity upload(@ModelAttribute AssetInput assetInput) throws IOException {
+        uploadService.upload(assetInput);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

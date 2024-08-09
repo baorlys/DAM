@@ -2,7 +2,6 @@ package com.example.dam.repository;
 
 import com.example.dam.model.Credential;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.UUID;
 

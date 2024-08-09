@@ -25,10 +25,13 @@ public class GetAssetServiceImpl implements GetAssetService {
         return credentialRepository.exists(Example.of(credential));
     }
 
-
-
     @Override
-    public List<AssetDTO> getAsset(String publicId) {
+    public List<AssetDTO> getAsset() {
+
         return null;
     }
+
+
+
+
 }

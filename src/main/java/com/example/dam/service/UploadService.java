@@ -8,9 +8,7 @@ import java.io.IOException;
 
 @Service
 public interface UploadService {
-
+    UploadAssetDTO upload(AssetInput assetInput) throws IOException;
 
     UploadAssetDTO uploadLarge(AssetInput assetInput);
-
-    String upload(AssetInput assetInput, String tenantId, String apiKey, String secretKey) throws IOException;
 }
