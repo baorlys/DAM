@@ -6,8 +6,8 @@ import com.example.dam.enums.Type;
 import com.example.dam.input.AssetInput;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
-import com.example.dam.model.Client;
 import com.example.dam.model.Folder;
+import com.example.dam.model.User;
 import com.example.dam.service.UploadService;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public UploadAssetDTO upload(AssetInput assetInput) throws IOException {
-        Client client = checkConfiguration(assetInput.getConfiguration());
+        User user = checkConfiguration(assetInput.getConfiguration());
         String publicId = UUID.randomUUID().toString();
         Path filePath = Paths.get(storageDirectory, publicId + "-" + assetInput.getFile().getOriginalFilename());
         Files.createDirectories(filePath.getParent());
@@ -31,10 +31,10 @@ public class UploadServiceImpl implements UploadService {
         long bytes = assetInput.getFile().getSize();
         Map attributes = buildUploadParams(assetInput.getOptions());
         Asset asset = new Asset();
-        asset.setClient(client);
+        asset.setClient(user);
         asset.setPublicId(publicId);
         asset.setFormat(getFormat((String) attributes.get("format")));
-        asset.setBytes(bytes);
+        asset.setSize(bytes);
         asset.setHeight((Integer) attributes.getOrDefault("height", 1000));
         asset.setWidth((Integer) attributes.getOrDefault("width", 1000));
         asset.setFolder((Folder) attributes.getOrDefault("asset_folder", null));
@@ -73,7 +73,7 @@ public class UploadServiceImpl implements UploadService {
         return null;
     }
 
-    public Client checkConfiguration(ConfigurationInput ci) {
+    public User checkConfiguration(ConfigurationInput ci) {
         if (ci.getApiKey() == null && ci.getApiSecret() == null && ci.getTenantId() == null) {
             throw new SecurityException("Invalid credential");
         }
