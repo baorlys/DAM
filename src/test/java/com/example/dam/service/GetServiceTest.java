@@ -1,4 +1,6 @@
 package com.example.dam.service;
 
-public class UploadServiceTest {
+
+public class GetServiceTest {
+
 }
