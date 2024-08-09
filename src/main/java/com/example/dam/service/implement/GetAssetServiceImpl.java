@@ -30,6 +30,9 @@ public class GetAssetServiceImpl implements GetAssetService {
     public AssetDTO getAsset(ConfigurationInput key, String publicId) throws CredentialException {
         boolean exists = credentialService.isValidKey(key.getTenantId(), key.getApiKey(), key.getSecretKey());
         CommonService.throwIsNotExists(!exists, "Credential not found");
-        return null;
+
+        return assetRepository.findByPublicId(publicId)
+                .map(AssetDTO::from)
+                .orElseThrow(() -> new CredentialException("Asset not found"));
     }
 }
