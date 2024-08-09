@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Data
+@Table(name = "User_entity")
 public class User {
     @Id
     @GeneratedValue
