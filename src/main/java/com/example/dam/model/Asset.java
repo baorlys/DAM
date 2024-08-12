@@ -17,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Asset {
     @Id
+    @GeneratedValue
     UUID id;
 
     @ManyToOne
@@ -34,11 +35,11 @@ public class Asset {
 
     String metadata;
 
-    @Column(updatable = false, nullable = false)
     @CreatedDate
+    @Column(updatable = false, nullable = false)
     LocalDateTime createdAt;
 
-    @Column(nullable = false)
     @LastModifiedDate
+    @Column(nullable = false)
     LocalDateTime updatedAt;
 }

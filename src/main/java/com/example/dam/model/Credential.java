@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Credential {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     UUID id;
 
     @ManyToOne
@@ -30,12 +30,12 @@ public class Credential {
     @Column(nullable = false)
     String secretKey;
 
-    @Column(updatable = false, nullable = false)
     @CreatedDate
+    @Column(updatable = false, nullable = false)
     LocalDateTime createdAt;
 
-    @Column(nullable = false)
     @LastModifiedDate
+    @Column(nullable = false)
     LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)

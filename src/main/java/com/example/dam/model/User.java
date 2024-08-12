@@ -18,6 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class User {
     @Id
+    @GeneratedValue
     UUID id;
 
     @Column(nullable = false, unique = true)
@@ -29,12 +30,12 @@ public class User {
     @Column(nullable = false)
     String password;
 
-    @Column(updatable = false, nullable = false)
     @CreatedDate
+    @Column(updatable = false, nullable = false)
     LocalDateTime createdAt;
 
-    @Column(nullable = false)
     @LastModifiedDate
+    @Column(nullable = false)
     LocalDateTime updatedAt;
 }
 

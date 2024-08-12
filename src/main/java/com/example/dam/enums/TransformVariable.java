@@ -7,13 +7,24 @@ public enum TransformVariable {
     QUALITY("q"),
     RESOLUTION("r");
 
-    private final String shortName;
-    TransformVariable(String value) {
-        this.shortName = value;
+    private final String shortCut;
+
+    public String getShortCut() {
+        return shortCut;
+    }
+    TransformVariable(String shortCut) {
+        this.shortCut = shortCut;
     }
 
-    public String getShortName() {
-        return shortName;
+
+    public static TransformVariable fromShortCut(String text) {
+        for (TransformVariable b : TransformVariable.values()) {
+            if (b.shortCut.equalsIgnoreCase(text)) {
+                return b;
+            }
+        }
+        return null;
     }
+
 
 }

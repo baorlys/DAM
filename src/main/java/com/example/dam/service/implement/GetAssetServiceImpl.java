@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.CredentialException;
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.Map;
 
 @Service
@@ -37,22 +38,33 @@ public class GetAssetServiceImpl implements GetAssetService {
 
 
     @Override
-    public AssetDTO getAsset(ConfigurationInput key, String path, Map<TransformVariable, String> options)
+    public AssetDTO getAsset(ConfigurationInput key, String path, Map<String, String> options)
             throws CredentialException, IOException, InterruptedException {
+        path = "src/main/resources/storage/" + path;
         boolean accessible = accessService.isAccessible(key.getApiKey(), key.getSecretKey(), path);
         CommonService.throwIsNotExists(!accessible, "Asset not accessible");
 
         Asset asset = assetRepository.findByFilePath(path);
 
+
         ResourceType resourceType = ResourceType.valueOf(getAssetMetadata(path, "resourceType").toUpperCase());
         ITransformable transformable = TransformFactory.getTransform(resourceType);
 
-        String transformedPath = transformable.transform(path, options);
+
+        String transformedPath = transformable.transform(path, convertToTransformVariable(options));
 
         asset.setFilePath(transformedPath);
         return mapper.map(asset, AssetDTO.class);
     }
 
+
+    private Map<TransformVariable, String> convertToTransformVariable(Map<String, String> options) {
+        Map<TransformVariable, String> transformVariables = new EnumMap<>(TransformVariable.class);
+        for (Map.Entry<String, String> entry : options.entrySet()) {
+            transformVariables.put(TransformVariable.fromShortCut(entry.getKey()), entry.getValue());
+        }
+        return transformVariables;
+    }
 
     public Map<String, String> getAssetMetadata(String path) throws JsonProcessingException {
         Asset asset = assetRepository.findByFilePath(path);
