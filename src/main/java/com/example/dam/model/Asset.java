@@ -34,11 +34,12 @@ public class Asset {
 
     String metadata;
 
-    @Column(updatable = false)
     @CreatedDate
+    @Column(updatable = false, nullable = false)
     LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(nullable = false)
     LocalDateTime updatedAt;
 
     public Asset(UUID id, Space space, Folder folder, String name, String filePath, String metadata) {

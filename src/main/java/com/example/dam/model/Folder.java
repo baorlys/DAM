@@ -16,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Folder {
     @Id
+    @GeneratedValue
     UUID id;
 
     @ManyToOne
@@ -28,12 +29,12 @@ public class Folder {
     @Column(nullable = false)
     String name;
 
-    @Column(updatable = false, nullable = false)
     @CreatedDate
+    @Column(updatable = false, nullable = false)
     LocalDateTime createdAt;
 
-    @Column(nullable = false)
     @LastModifiedDate
+    @Column(nullable = false)
     LocalDateTime updatedAt;
 
 
