@@ -1,38 +1,49 @@
 package com.example.dam.model;
 
-import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.CreatedBy;
+
+import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Credential {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     UUID id;
 
     @ManyToOne
-    @CreatedBy
-    Tenant tenant;
+    @JoinColumn(nullable = false)
+    User user;
 
     @Column(nullable = false, unique = true)
     String apiKey;
 
-    @Column(nullable = false, unique = true)
-    String apiSecret;
+    @Column(nullable = false)
+    String secretKey;
 
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false, nullable = false)
     @CreatedDate
     LocalDateTime createdAt;
 
-    LocalDateTime lastUsedAt;
+    @Column(nullable = false)
+    @LastModifiedDate
+    LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    Status status;
+
+    public enum Status {
+        ACTIVE,
+        INACTIVE
+    }
 }

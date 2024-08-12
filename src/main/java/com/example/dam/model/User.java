@@ -1,7 +1,9 @@
 package com.example.dam.model;
 
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import jakarta.persistence.*;
-import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -9,11 +11,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table(name = "user_info")
 @Data
-@Table(name = "User_entity")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
-    @GeneratedValue
     UUID id;
 
     @Column(nullable = false, unique = true)
@@ -25,13 +29,12 @@ public class User {
     @Column(nullable = false)
     String password;
 
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false, nullable = false)
     @CreatedDate
     LocalDateTime createdAt;
 
     @Column(nullable = false)
     @LastModifiedDate
     LocalDateTime updatedAt;
-
-
 }
+

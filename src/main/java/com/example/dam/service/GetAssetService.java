@@ -1,9 +1,10 @@
 package com.example.dam.service;
 
 import com.example.dam.dto.AssetDTO;
+import com.example.dam.input.ConfigurationInput;
 
-import java.util.List;
+import javax.security.auth.login.CredentialException;
 
 public interface GetAssetService {
-    List<AssetDTO> getAsset(String publicId);
+    AssetDTO getAsset(ConfigurationInput key, String publicId) throws CredentialException;
 }

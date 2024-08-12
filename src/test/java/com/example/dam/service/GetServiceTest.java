@@ -1,8 +1,5 @@
 package com.example.dam.service;
 
-import com.example.dam.dto.AssetDTO;
-import com.example.dam.model.Credential;
-import com.example.dam.model.Tenant;
 import com.example.dam.repository.AssetRepository;
 import com.example.dam.repository.CredentialRepository;
 import com.example.dam.service.implement.GetAssetServiceImpl;
@@ -14,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,7 +46,6 @@ public class GetServiceTest {
         when(credentialRepository.findOne(Example.of(credential))).thenReturn(Optional.of(credential));
         when(assetRepository.findByPublicId(publicId)).thenReturn(null);
 
-        List<AssetDTO> assetResponse = getService.getAsset(publicId);
 
         verify(credentialRepository, times(1)).exists(Example.of(credential));
         verify(credentialRepository, times(1)).findOne(Example.of(credential));

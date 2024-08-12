@@ -1,20 +1,21 @@
 package com.example.dam.model;
 
-import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.CreatedDate;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
+
 import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuditLog {
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserFolder {
     @Id
     @GeneratedValue
     UUID id;
@@ -22,13 +23,18 @@ public class AuditLog {
     @ManyToOne
     User user;
 
-    @Column(nullable = false)
-    String action;
-
     @ManyToOne
-    private Asset asset;
+    Folder folder;
 
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    LocalDateTime timestamp;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    Access accessLevel;
+
+    public enum Access {
+        READ,
+        WRITE,
+        ADMIN
+    }
+
+
 }
