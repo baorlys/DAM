@@ -14,13 +14,16 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(UserSpaceId.class)
 public class UserSpace {
     @Id
-    UUID userId;
+    @GeneratedValue
+    UUID id;
 
-    @Id
-    UUID spaceId;
+    @ManyToOne
+    User user;
+
+    @ManyToOne
+    Space space;
 
     @ManyToOne
     @JoinColumn(nullable = false)

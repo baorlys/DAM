@@ -1,6 +1,9 @@
 package com.example.dam.model;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import jakarta.persistence.*;
@@ -12,21 +15,26 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(UserFolderId.class)
 public class UserFolder {
     @Id
-    UUID userId;
+    @GeneratedValue
+    UUID id;
 
-    @Id
-    UUID folderId;
+    @ManyToOne
+    User user;
+
+    @ManyToOne
+    Folder folder;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    AccessLevel accessLevel;
+    Access accessLevel;
 
-    public enum AccessLevel {
+    public enum Access {
         READ,
         WRITE,
         ADMIN
     }
+
+
 }
