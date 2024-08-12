@@ -1,9 +1,8 @@
 package com.example.dam.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -15,24 +14,16 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Asset {
+public class Space {
     @Id
     UUID id;
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    Space space;
-
-    @ManyToOne
-    Folder folder;
+    Tenant tenant;
 
     @Column(nullable = false)
     String name;
-
-    @Column(nullable = false)
-    String filePath;
-
-    String metadata;
 
     @Column(updatable = false, nullable = false)
     @CreatedDate

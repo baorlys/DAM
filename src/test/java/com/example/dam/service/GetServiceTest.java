@@ -1,8 +1,5 @@
 package com.example.dam.service;
 
-import com.example.dam.dto.AssetDTO;
-import com.example.dam.model.Credential;
-import com.example.dam.model.Tenant;
 import com.example.dam.repository.AssetRepository;
 import com.example.dam.repository.CredentialRepository;
 import com.example.dam.service.implement.GetAssetServiceImpl;
@@ -14,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

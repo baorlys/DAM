@@ -2,10 +2,7 @@ package com.example.dam.service.impl;
 
 import com.example.dam.dto.UploadAssetDTO;
 import com.example.dam.enums.Format;
-import com.example.dam.enums.Type;
 import com.example.dam.input.AssetInput;
-import com.example.dam.input.ConfigurationInput;
-import com.example.dam.model.*;
 import com.example.dam.repository.CredentialRepository;
 import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.UploadService;
@@ -13,9 +10,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -28,25 +22,25 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public UploadAssetDTO upload(AssetInput assetInput) throws IOException {
 //        checkConfiguration(assetInput.getTenantId(), assetInput.getApiKey());
-        String publicId = UUID.randomUUID().toString();
-        Path filePath = Paths.get(storageDirectory, publicId + "-" + assetInput.getFile().getOriginalFilename());
-        Files.createDirectories(filePath.getParent());
-        Files.copy(assetInput.getFile().getInputStream(), filePath);
-        long bytes = assetInput.getFile().getSize();
-        Map<? , ?> attributes = buildUploadParams(assetInput.getOptions());
-        Asset asset = new Asset();
-        Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
-        asset.setTenant(tenant);
-        asset.setPublicId(publicId);
-        asset.setFormat(getFormat((String) attributes.get("format")));
-        asset.setSize(bytes);
-        asset.setHeight((Integer) attributes.getOrDefault("height", 1000));
-        asset.setWidth((Integer) attributes.getOrDefault("width", 1000));
-        asset.setFolder((Folder) attributes.getOrDefault("asset_folder", null));
-        asset.setDisplayName((String) attributes.getOrDefault("display_name", ""));
-        asset.setType((Type) attributes.get("type"));
-        asset.setPlaceholder((Boolean) attributes.getOrDefault("place_holder", false));
-        asset.setUrl(filePath.toString());
+//        String publicId = UUID.randomUUID().toString();
+//        Path filePath = Paths.get(storageDirectory, publicId + "-" + assetInput.getFile().getOriginalFilename());
+//        Files.createDirectories(filePath.getParent());
+//        Files.copy(assetInput.getFile().getInputStream(), filePath);
+//        long bytes = assetInput.getFile().getSize();
+//        Map<? , ?> attributes = buildUploadParams(assetInput.getOptions());
+//        Asset asset = new Asset();
+//        Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
+//        asset.setTenant(tenant);
+//        asset.setPublicId(publicId);
+//        asset.setFormat(getFormat((String) attributes.get("format")));
+//        asset.setSize(bytes);
+//        asset.setHeight((Integer) attributes.getOrDefault("height", 1000));
+//        asset.setWidth((Integer) attributes.getOrDefault("width", 1000));
+//        asset.setFolder((Folder) attributes.getOrDefault("asset_folder", null));
+//        asset.setDisplayName((String) attributes.getOrDefault("display_name", ""));
+//        asset.setType((Type) attributes.get("type"));
+//        asset.setPlaceholder((Boolean) attributes.getOrDefault("place_holder", false));
+//        asset.setUrl(filePath.toString());
         return new UploadAssetDTO();
     }
 

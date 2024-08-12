@@ -5,7 +5,6 @@ import lombok.experimental.FieldDefaults;
 
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,30 +14,19 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Asset {
+@IdClass(UserSpaceId.class)
+public class UserSpace {
     @Id
-    UUID id;
+    UUID userId;
+
+    @Id
+    UUID spaceId;
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    Space space;
-
-    @ManyToOne
-    Folder folder;
-
-    @Column(nullable = false)
-    String name;
-
-    @Column(nullable = false)
-    String filePath;
-
-    String metadata;
+    Role role;
 
     @Column(updatable = false, nullable = false)
     @CreatedDate
-    LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    @LastModifiedDate
-    LocalDateTime updatedAt;
+    LocalDateTime joinedAt;
 }
