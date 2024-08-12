@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ConfigurationInput {
-    String tenantId;
+    String spaceId;
     String apiKey;
     String secretKey;
 }

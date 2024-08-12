@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface AssetRepository extends JpaRepository<Asset, UUID> {
 
+    Asset findByFilePath(String filePath);
 }

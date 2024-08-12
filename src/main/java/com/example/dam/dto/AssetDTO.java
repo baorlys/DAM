@@ -11,7 +11,7 @@ public record AssetDTO (
     ResourceType type,
     Format format,
     long size,
-    String url,
+    String filePath,
     String thumbnailUrl,
     String displayName,
     String originalFilename,
