@@ -19,7 +19,7 @@ public class Folder {
     UUID id;
 
     @ManyToOne
-    @JoinColumn( nullable = false)
+    @JoinColumn(nullable = false)
     Space space;
 
     @ManyToOne
@@ -35,4 +35,14 @@ public class Folder {
     @Column(nullable = false)
     @LastModifiedDate
     LocalDateTime updatedAt;
+
+
+    public Folder(Space space, Folder parent, String name) {
+        this.id = UUID.randomUUID();
+        this.space = space;
+        this.parent = parent;
+        this.name = name;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 }
