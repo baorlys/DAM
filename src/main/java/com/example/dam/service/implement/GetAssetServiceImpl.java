@@ -12,12 +12,12 @@ import com.example.dam.service.AccessService;
 import com.example.dam.service.GetAssetService;
 import com.example.dam.service.transform.ITransformable;
 import com.example.dam.service.transform.TransformFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.CredentialException;
@@ -29,6 +29,10 @@ import java.util.Map;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GetAssetServiceImpl implements GetAssetService {
+    @Value("${storage.path}")
+    final String storagePath;
+    @Value("${transformed.path}")
+    final String transformedPath;
     AssetRepository assetRepository;
     AccessService accessService;
 
@@ -40,18 +44,18 @@ public class GetAssetServiceImpl implements GetAssetService {
     @Override
     public AssetDTO getAsset(ConfigurationInput key, String path, Map<String, String> options)
             throws CredentialException, IOException, InterruptedException {
-        path = "src/main/resources/storage/" + path;
+        path = storagePath + path;
         boolean accessible = accessService.isAccessible(key.getApiKey(), key.getSecretKey(), path);
         CommonService.throwIsNotExists(!accessible, "Asset not accessible");
 
         Asset asset = assetRepository.findByFilePath(path);
-
-
-        ResourceType resourceType = ResourceType.valueOf(getAssetMetadata(path, "resourceType").toUpperCase());
+        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
+        // Transform the asset if necessary
+        ResourceType resourceType = ResourceType.valueOf(metadata.get("resourceType").toUpperCase());
         ITransformable transformable = TransformFactory.getTransform(resourceType);
 
-
-        String transformedPath = transformable.transform(path, convertToTransformVariable(options));
+        String outputPath = transformedPath + asset.getFilePath();
+        transformable.transform(path,outputPath, convertToTransformVariable(options));
 
         asset.setFilePath(transformedPath);
         return mapper.map(asset, AssetDTO.class);
@@ -66,15 +70,6 @@ public class GetAssetServiceImpl implements GetAssetService {
         return transformVariables;
     }
 
-    public Map<String, String> getAssetMetadata(String path) throws JsonProcessingException {
-        Asset asset = assetRepository.findByFilePath(path);
-        return objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
-    }
 
-    public String getAssetMetadata(String path, String key) throws JsonProcessingException {
-        Asset asset = assetRepository.findByFilePath(path);
-        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
-        return metadata.get(key);
-    }
 
 }
