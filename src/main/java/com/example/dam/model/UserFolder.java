@@ -36,10 +36,5 @@ public class UserFolder {
         ADMIN
     }
 
-    public UserFolder(User user, Folder folder, Access accessLevel) {
-        this.id = UUID.randomUUID();
-        this.user = user;
-        this.folder = folder;
-        this.accessLevel = accessLevel;
-    }
+
 }
