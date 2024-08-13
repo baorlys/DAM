@@ -28,9 +28,9 @@ public class Space {
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
-    LocalDateTime createdAt;
+    LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     @LastModifiedDate
-    LocalDateTime updatedAt;
+    LocalDateTime updatedAt = LocalDateTime.now();
 }

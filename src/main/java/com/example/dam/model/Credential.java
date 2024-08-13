@@ -32,11 +32,11 @@ public class Credential {
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
-    LocalDateTime createdAt;
+    LocalDateTime createdAt = LocalDateTime.now();
 
     @LastModifiedDate
     @Column(nullable = false)
-    LocalDateTime updatedAt;
+    LocalDateTime updatedAt = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

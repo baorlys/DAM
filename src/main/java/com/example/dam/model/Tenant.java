@@ -28,9 +28,9 @@ public class Tenant {
 
     @Column(updatable = false, nullable = false)
     @CreatedDate
-    LocalDateTime createdAt;
+    LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     @LastModifiedDate
-    LocalDateTime updatedAt;
+    LocalDateTime updatedAt = LocalDateTime.now();
 }
