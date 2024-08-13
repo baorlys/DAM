@@ -26,7 +26,7 @@ public class FolderServiceImpl implements FolderService {
     private final UserRepository userRepository;
     private final FolderRepository folderRepository;
     private final UserFolderRepository userFolderRepository;
-    private final String storageDirectory = "src/main/resources/storage/tenant-1";
+    private final String storageDirectory = "src/main/resources/storage";
 
     @Override
     public Folder createFolder(UUID userId, String fName, UUID spaceId, UUID parentId) throws IOException {

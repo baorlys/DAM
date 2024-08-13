@@ -1,6 +1,5 @@
 package com.example.dam.controller;
 
-import com.example.dam.dto.UploadAssetDTO;
 import com.example.dam.input.AssetInput;
 import com.example.dam.service.UploadService;
 import lombok.AllArgsConstructor;

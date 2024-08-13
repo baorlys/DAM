@@ -42,4 +42,13 @@ public class Asset {
     @LastModifiedDate
     @Column(nullable = false)
     LocalDateTime updatedAt = LocalDateTime.now();
+
+    public Asset(Space space, Folder folder, String name, String filePath, String metadata) {
+        this.id = UUID.randomUUID();
+        this.space = space;
+        this.folder = folder;
+        this.name = name;
+        this.filePath = filePath;
+        this.metadata = metadata;
+    }
 }
