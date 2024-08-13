@@ -1,83 +1,75 @@
 package com.example.dam.service.impl;
 
+import com.example.dam.dto.UploadAssetDTO;
+import com.example.dam.enums.Format;
 import com.example.dam.input.AssetInput;
-import com.example.dam.model.Asset;
-import com.example.dam.model.Credential;
-import com.example.dam.model.Folder;
-import com.example.dam.model.Space;
-import com.example.dam.repository.*;
-import com.example.dam.service.CommonService;
-import com.example.dam.service.CredentialService;
-import com.example.dam.service.FolderService;
+import com.example.dam.repository.CredentialRepository;
+import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.UploadService;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class UploadServiceImpl implements UploadService {
     private final String storageDirectory = "src/main/resources/storage/tenant-1";
-    private final CredentialService credentialService;
-    private FolderService folderService;
-    private final SpaceRepository spaceRepository;
-    private final AssetRepository assetRepository;
+    private final CredentialRepository credentialRepository;
+    private final TenantRepository tenantRepository;
 
     @Override
-    public String upload(AssetInput assetInput, UUID spaceId, String apikey, String apiSecret) throws IOException {
-        Map<String, Object> attributes = buildUploadParams(assetInput.getOptions());
-        Space space = getSpace(spaceId);
-        Credential credential = credentialService.getCredential(apikey, apiSecret);
-        Folder folder = getOrCreateFolder((String) attributes.get("folder_name"), credential, spaceId);
-        String path = CommonService.filePathHandler(space, folder, assetInput.getFile().getOriginalFilename());
-        String url = saveHandler(assetInput.getFile(), path, storageDirectory);
-        Asset asset = new Asset(space, folder, assetInput.getFile().getName(), url, attributes.toString());
-        assetRepository.save(asset);
-        return asset.getFilePath();
+    public UploadAssetDTO upload(AssetInput assetInput) throws IOException {
+//        checkConfiguration(assetInput.getTenantId(), assetInput.getApiKey());
+//        String publicId = UUID.randomUUID().toString();
+//        Path filePath = Paths.get(storageDirectory, publicId + "-" + assetInput.getFile().getOriginalFilename());
+//        Files.createDirectories(filePath.getParent());
+//        Files.copy(assetInput.getFile().getInputStream(), filePath);
+//        long bytes = assetInput.getFile().getSize();
+//        Map<? , ?> attributes = buildUploadParams(assetInput.getOptions());
+//        Asset asset = new Asset();
+//        Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
+//        asset.setTenant(tenant);
+//        asset.setPublicId(publicId);
+//        asset.setFormat(getFormat((String) attributes.get("format")));
+//        asset.setSize(bytes);
+//        asset.setHeight((Integer) attributes.getOrDefault("height", 1000));
+//        asset.setWidth((Integer) attributes.getOrDefault("width", 1000));
+//        asset.setFolder((Folder) attributes.getOrDefault("asset_folder", null));
+//        asset.setDisplayName((String) attributes.getOrDefault("display_name", ""));
+//        asset.setType((Type) attributes.get("type"));
+//        asset.setPlaceholder((Boolean) attributes.getOrDefault("place_holder", false));
+//        asset.setUrl(filePath.toString());
+        return new UploadAssetDTO();
     }
 
-    private Space getSpace(UUID spaceId) {
-        return spaceRepository.findById(spaceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Space ID: " + spaceId));
+    public Format getFormat(String val) {
+        return Arrays.stream(Format.values())
+                .filter(f -> f.name().equalsIgnoreCase(val))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid format: " + val));
     }
 
-    private Folder getOrCreateFolder(String folderName, Credential credential, UUID spaceId) throws IOException {
-        if (folderName == null || credential == null) {
-            return null;
-        }
-        return folderService.createFolder(credential.getUser().getId(), folderName, spaceId, null);
-    }
 
-    public String saveHandler(MultipartFile file, String fileName, String storageDirectory) throws IOException {
-        Path filePath = Paths.get(storageDirectory, fileName);
-        Path parentDir = filePath.getParent();
-        if (parentDir != null) {
-            Files.createDirectories(parentDir);
-        }
-        Files.copy(file.getInputStream(), filePath);
-        return filePath.toString();
-    }
-
-    private Map<String, Object> buildUploadParams(Map<String, String> options) {
+    private Map<String, String> buildUploadParams(Map<String, String> options) {
         if (options == null) {
             options = Collections.emptyMap();
         }
-        Map<String, Object> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
         params.put("public_id", options.get("public_id"));
-        params.put("folder_name", options.get("folder_name"));
-        params.put("parent_folder", options.get("parent_folder"));
+        params.put("format", options.get("format"));
         params.put("type", options.get("type"));
+        params.put("asset_folder", options.get("asset_folder"));
         params.put("display_name", options.get("display_name"));
         params.put("notification_url", options.get("notification_url"));
         return params;
+    }
+
+
+    @Override
+    public UploadAssetDTO uploadLarge(AssetInput assetInput) {
+        return null;
     }
 
 }

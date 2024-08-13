@@ -16,7 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Tenant {
     @Id
-    @GeneratedValue
     UUID id;
 
     @Column(nullable = false, unique = true)

@@ -34,29 +34,11 @@ public class Asset {
 
     String metadata;
 
-    @CreatedDate
     @Column(updatable = false, nullable = false)
+    @CreatedDate
     LocalDateTime createdAt;
 
-    @LastModifiedDate
     @Column(nullable = false)
+    @LastModifiedDate
     LocalDateTime updatedAt;
-
-    public Asset(UUID id, Space space, Folder folder, String name, String filePath, String metadata) {
-        this.id = id;
-        this.space = space;
-        this.folder = folder;
-        this.name = name;
-        this.filePath = filePath;
-        this.metadata = metadata;
-    }
-
-    public Asset(Space space, Folder folder, String name, String filePath, String metadata) {
-        this.id = UUID.randomUUID();
-        this.space = space;
-        this.folder = folder;
-        this.name = name;
-        this.filePath = filePath;
-        this.metadata = metadata;
-    }
 }

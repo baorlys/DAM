@@ -29,7 +29,7 @@ public class UserSpace {
     @JoinColumn(nullable = false)
     Role role;
 
-    @CreatedDate
     @Column(updatable = false, nullable = false)
+    @CreatedDate
     LocalDateTime joinedAt;
 }

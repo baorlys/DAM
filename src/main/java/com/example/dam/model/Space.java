@@ -16,7 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Space {
     @Id
-    @GeneratedValue
     UUID id;
 
     @ManyToOne
@@ -26,8 +25,8 @@ public class Space {
     @Column(nullable = false)
     String name;
 
-    @CreatedDate
     @Column(updatable = false, nullable = false)
+    @CreatedDate
     LocalDateTime createdAt;
 
     @Column(nullable = false)

@@ -1,7 +1,8 @@
 package com.example.dam.service;
 
+import com.example.dam.dto.UploadAssetDTO;
 import com.example.dam.input.AssetInput;
-import com.example.dam.model.Asset;
+import com.example.dam.input.ConfigurationInput;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +12,6 @@ import org.springframework.util.MimeTypeUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -22,46 +20,67 @@ class UploadServiceTest {
     @Autowired
     private UploadService uploadService;
 
-    private String apiKey;
-    private String apiSecret;
-    private UUID spaceId;
+    private ConfigurationInput configurationInput;
 
-    private AssetInput assetInput;
     @BeforeEach
     void init() {
-        apiKey = "apiKey1";
-        apiSecret = "secretKey1";
-        spaceId = UUID.fromString("47B11EDC-4A0C-4EA6-8D9C-7FD2B84C3C74");
-        assetInput = new AssetInput();
-//        Map<String, String> options = new HashMap<>();
-//        options.put("folder_name", "New folder");
-//        assetInput.setOptions(options);
+        configurationInput = new ConfigurationInput();
+        configurationInput.setTenantId("tenant");
+        configurationInput.setApiKey("apikey");
+        configurationInput.setApiSecret("secret");
     }
-
     @Test
     void testUploadVideo() throws IOException {
-        MockMultipartFile videoFile = new MockMultipartFile("video-test", "video.mp4",
+        MockMultipartFile videoFile = new MockMultipartFile("video", "video.mp4",
                 MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE, new FileInputStream("src/main/resources/storage/tenant-1/dance-2.mp4"));
+        AssetInput assetInput = new AssetInput();
         assetInput.setFile(videoFile);
-        String response = uploadService.upload(assetInput, spaceId, apiKey, apiSecret);
+        assetInput.setConfiguration(configurationInput);
+        UploadAssetDTO response = uploadService.upload(assetInput);
         assertNotNull(response);
     }
 
     @Test
+    void testUploadFilePDF() throws IOException {
+//        MockMultipartFile pdfFile = new MockMultipartFile("pdf", "document.pdf",
+//                MimeTypeUtils.APPLICATION_PDF_VALUE, new FileInputStream("path/to/document.pdf"));
+//        AssetInput assetInput = new AssetInput();
+//        assetInput.setFile(videoFile);
+//        assetInput.setConfiguration(configurationInput);
+//        AssetDTO response = uploadService.upload(assetInput);
+//        assertNotNull(response);
+    }
+
+    @Test
     void testUploadImage() throws IOException {
-        MockMultipartFile imageFile = new MockMultipartFile("image-test", "image.jpg",
+        MockMultipartFile imageFile = new MockMultipartFile("image", "image.jpg",
                 MimeTypeUtils.IMAGE_PNG_VALUE, new FileInputStream("src/main/resources/storage/tenant-2/nature-mountains.jpg"));
+        AssetInput assetInput = new AssetInput();
         assetInput.setFile(imageFile);
-        String response = uploadService.upload(assetInput, spaceId, apiKey, apiSecret);
+        assetInput.setConfiguration(configurationInput);
+        UploadAssetDTO response = uploadService.upload(assetInput);
+        assertNotNull(response);
+    }
+
+    @Test
+    void testUploadEmoji() throws IOException {
+        MockMultipartFile emojiFile = new MockMultipartFile("emoji", "emoji.png",
+                MimeTypeUtils.IMAGE_PNG_VALUE, new FileInputStream("path/to/emoji.png"));
+        AssetInput assetInput = new AssetInput();
+        assetInput.setFile(emojiFile);
+        assetInput.setConfiguration(configurationInput);
+        UploadAssetDTO response = uploadService.upload(assetInput);
         assertNotNull(response);
     }
 
     @Test
     void testUploadGif() throws IOException {
-        MockMultipartFile gifFile = new MockMultipartFile("gif-test", "animation.gif",
+        MockMultipartFile gifFile = new MockMultipartFile("gif", "animation.gif",
                 MimeTypeUtils.IMAGE_GIF_VALUE, new FileInputStream("path/to/animation.gif"));
+        AssetInput assetInput = new AssetInput();
         assetInput.setFile(gifFile);
-        String response = uploadService.upload(assetInput, spaceId, apiKey, apiSecret);
+        assetInput.setConfiguration(configurationInput);
+        UploadAssetDTO response = uploadService.upload(assetInput);
         assertNotNull(response);
     }
 

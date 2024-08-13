@@ -13,10 +13,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Role {
     @Id
-    @GeneratedValue
     UUID id;
 
-    @Column(unique = true, nullable = false)
+    @Column
     String name;
 
     @Column
