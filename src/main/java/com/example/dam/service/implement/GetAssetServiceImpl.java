@@ -31,8 +31,6 @@ import java.util.Map;
 public class GetAssetServiceImpl implements GetAssetService {
     @Value("${storage.path}")
     final String storagePath;
-    @Value("${transformed.path}")
-    final String transformedPath;
     AssetRepository assetRepository;
     AccessService accessService;
 
@@ -50,14 +48,19 @@ public class GetAssetServiceImpl implements GetAssetService {
 
         Asset asset = assetRepository.findByFilePath(path);
         Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
+
+        if (options.isEmpty()) {
+            return mapper.map(asset, AssetDTO.class);
+        }
+
         // Transform the asset if necessary
         ResourceType resourceType = ResourceType.valueOf(metadata.get("resourceType").toUpperCase());
         ITransformable transformable = TransformFactory.getTransform(resourceType);
 
-        String outputPath = transformedPath + asset.getFilePath();
+        String outputPath = ITransformable.TRANSFORMED_PATH + asset.getFilePath();
         transformable.transform(path,outputPath, convertToTransformVariable(options));
 
-        asset.setFilePath(transformedPath);
+        asset.setFilePath(outputPath);
         return mapper.map(asset, AssetDTO.class);
     }
 
