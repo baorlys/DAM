@@ -1,4 +1,4 @@
-package com.example.dam.service.implement;
+package com.example.dam.service;
 
 
 import com.example.dam.dto.AssetDTO;
@@ -7,6 +7,7 @@ import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.repository.AssetRepository;
 import com.example.dam.service.AccessService;
+import com.example.dam.service.implement.GetAssetServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
