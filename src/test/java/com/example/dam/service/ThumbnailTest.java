@@ -1,5 +1,6 @@
 package com.example.dam.service;
 
+import com.example.dam.global.service.CommonService;
 import com.example.dam.service.thumbnail.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

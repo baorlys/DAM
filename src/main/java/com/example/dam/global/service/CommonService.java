@@ -1,4 +1,4 @@
-package com.example.dam.service;
+package com.example.dam.global.service;
 
 import com.example.dam.global.random.RandomId;
 import com.example.dam.model.Folder;

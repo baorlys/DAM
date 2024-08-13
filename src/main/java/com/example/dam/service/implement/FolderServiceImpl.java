@@ -5,7 +5,7 @@ import com.example.dam.repository.FolderRepository;
 import com.example.dam.repository.SpaceRepository;
 import com.example.dam.repository.UserFolderRepository;
 import com.example.dam.repository.UserRepository;
-import com.example.dam.service.CommonService;
+import com.example.dam.global.service.CommonService;
 import com.example.dam.service.FolderService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

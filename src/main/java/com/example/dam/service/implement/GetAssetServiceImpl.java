@@ -1,5 +1,6 @@
 package com.example.dam.service.implement;
 
+import com.example.dam.config.StorageProperties;
 import com.example.dam.dto.AssetDTO;
 import com.example.dam.enums.ResourceType;
 import com.example.dam.enums.TransformVariable;
@@ -9,14 +10,13 @@ import com.example.dam.model.Asset;
 import com.example.dam.model.Space;
 import com.example.dam.repository.AssetRepository;
 import com.example.dam.repository.SpaceRepository;
-import com.example.dam.service.CommonService;
+import com.example.dam.global.service.CommonService;
 import com.example.dam.service.AccessService;
 import com.example.dam.service.GetAssetService;
 import com.example.dam.service.transform.ITransformable;
 import com.example.dam.service.transform.TransformFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,8 +30,7 @@ import java.util.*;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GetAssetServiceImpl implements GetAssetService {
-    Dotenv dotenv;
-
+    StorageProperties storageProperties;
     AssetRepository assetRepository;
 
     SpaceRepository spaceRepository;
@@ -49,7 +48,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         CommonService.throwIsNotExists(space == null, "Space not found");
 
         Objects.requireNonNull(space);
-        String buildPath = dotenv.get("storage.path.format")
+        String buildPath = storageProperties.getPathFormat()
                 .replace("{tenant}", space.getTenant().getName())
                 .replace("{space}", space.getName())
                 .replace("{path}", path);

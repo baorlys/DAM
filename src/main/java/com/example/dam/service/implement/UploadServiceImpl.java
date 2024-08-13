@@ -6,7 +6,7 @@ import com.example.dam.model.Credential;
 import com.example.dam.model.Folder;
 import com.example.dam.model.Space;
 import com.example.dam.repository.*;
-import com.example.dam.service.CommonService;
+import com.example.dam.global.service.CommonService;
 import com.example.dam.service.FolderService;
 import com.example.dam.service.UploadService;
 import lombok.AllArgsConstructor;
