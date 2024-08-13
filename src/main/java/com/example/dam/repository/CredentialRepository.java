@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface CredentialRepository extends JpaRepository<Credential, UUID> {
-    Optional<Credential> findCredentialByApiKeyAndSecretKey(String apiKey, String secretKet);
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END FROM Credential c WHERE c.apiKey = ?1 AND c.secretKey = ?2")
     boolean existsByApiKeyAndSecretKey(String apiKey, String secretKey);
