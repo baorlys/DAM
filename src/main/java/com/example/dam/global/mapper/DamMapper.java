@@ -5,5 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DamMapper extends ModelMapper {
-
+    public DamMapper() {
+        super();
+    }
 }
