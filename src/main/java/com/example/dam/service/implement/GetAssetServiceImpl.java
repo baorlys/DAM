@@ -16,10 +16,10 @@ import com.example.dam.service.transform.ITransformable;
 import com.example.dam.service.transform.TransformFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.CredentialException;
@@ -30,11 +30,8 @@ import java.util.*;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GetAssetServiceImpl implements GetAssetService {
-    @Value("${storage.path}")
-    static final String STORAGE_PATH = "";
+    Dotenv dotenv;
 
-    @Value("${storage.path.format}")
-    static final String PATH_FORMAT = "";
     AssetRepository assetRepository;
 
     SpaceRepository spaceRepository;
@@ -52,7 +49,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         CommonService.throwIsNotExists(space == null, "Space not found");
 
         Objects.requireNonNull(space);
-        String buildPath = PATH_FORMAT
+        String buildPath = dotenv.get("storage.path.format")
                 .replace("{tenant}", space.getTenant().getName())
                 .replace("{space}", space.getName())
                 .replace("{path}", path);

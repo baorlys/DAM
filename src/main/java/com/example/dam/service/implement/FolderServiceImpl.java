@@ -28,7 +28,7 @@ public class FolderServiceImpl implements FolderService {
     private final FolderRepository folderRepository;
     private final UserFolderRepository userFolderRepository;
     @Value("${storage.url}")
-    private final String storageDirectory;
+    private static final String storageDirectory = "";
 
     @Override
     public Folder createFolder(UUID userId, String fName, UUID spaceId, UUID parentId) throws IOException {

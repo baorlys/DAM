@@ -26,7 +26,7 @@ import java.util.*;
 @Slf4j
 public class UploadServiceImpl implements UploadService {
     @Value("${storage.url}")
-    private final String storageDirectory;
+    private static final String storageDirectory = "";
     private final CredentialRepository credentialRepository;
     private FolderService folderService;
     private final SpaceRepository spaceRepository;

@@ -6,12 +6,10 @@ import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.repository.AssetRepository;
-import com.example.dam.service.AccessService;
-import com.example.dam.service.implement.GetAssetServiceImpl;
+import com.example.dam.repository.SpaceRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ActiveProfiles;
@@ -31,7 +29,8 @@ class GetAssetServiceImplTest {
     private AssetRepository assetRepository;
 
     @Mock
-    private AccessService accessService;
+    SpaceRepository spaceRepository;
+
 
     @Mock
     private DamMapper mapper;
@@ -39,8 +38,12 @@ class GetAssetServiceImplTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    @InjectMocks
-    private GetAssetServiceImpl getAssetService;
+    @Mock
+    private GetAssetService getAssetService;
+
+
+    @Mock
+    private AccessService accessService;
 
     @BeforeEach
     public void setUp() {
@@ -51,9 +54,9 @@ class GetAssetServiceImplTest {
     void testGetAsset_success() throws CredentialException, IOException, InterruptedException {
         // Setup
         String path = "cup-on-a-table.jpg";
-        ConfigurationInput key = new ConfigurationInput("c1d4e15e-852c-4452-847d-0970cf36d1d4","apiKeyA", "secretKeyA");
+        ConfigurationInput key = new ConfigurationInput("C1D4E15E-852C-4452-847D-0970CF36D1D4","apiKeyA", "secretKeyA");
         Map<String, String> options = new HashMap<>();
-        Asset asset = assetRepository.findByFilePath(path);
+        Asset asset = assetRepository.findByFilePath("src/main/resources/storage/cup-on-a-table.jpg");
 
 
 
