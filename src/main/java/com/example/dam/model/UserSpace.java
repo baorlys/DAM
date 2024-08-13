@@ -31,5 +31,5 @@ public class UserSpace {
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
-    LocalDateTime joinedAt;
+    LocalDateTime joinedAt = LocalDateTime.now();
 }
