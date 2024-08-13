@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,19 +30,20 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     public Folder createFolder(UUID userId, String fName, UUID spaceId, UUID parentId) throws IOException {
-        Folder folder = folderRepository.findFolderByNameAndSpace_Id(fName, spaceId);
-        CommonService.checkNull(folder);
-        Path folderPath = Paths.get(storageDirectory, folder.getName());
+        Path folderPath = Paths.get(storageDirectory, fName);
         if (!Files.exists(folderPath)) {
             Files.createDirectories(folderPath);
         }
         User user = userRepository.findById(userId).orElse(null);
         Space space = spaceRepository.findById(spaceId).orElse(null);
-        Folder parent = (parentId != null) ? getFolderById(parentId) : null;
+        Folder parent = Optional.ofNullable(parentId)
+                .map(this::getFolderById)
+                .orElse(null);
         CommonService.checkNonNull(user, space);
-        folder = new Folder(space, parent, fName);
+        Folder folder = new Folder(space, parent, fName);
+        folder = folderRepository.save(folder);
         createFolderAccess(user, folder, UserFolder.Access.ADMIN);
-        return folderRepository.save(folder);
+        return folder;
     }
 
     @Override

@@ -24,11 +24,13 @@ import java.util.*;
 @AllArgsConstructor
 @Slf4j
 public class UploadServiceImpl implements UploadService {
-    private final String storageDirectory = "src/main/resources/storage/tenant-1";
+    private final String storageDirectory = "src/main/resources/storage";
     private final CredentialRepository credentialRepository;
     private FolderService folderService;
     private final SpaceRepository spaceRepository;
     private final AssetRepository assetRepository;
+
+    private final FolderRepository folderRepository;
 
     @Override
     public String upload(AssetInput assetInput, UUID spaceId, String apikey, String apiSecret) throws IOException {
@@ -52,7 +54,8 @@ public class UploadServiceImpl implements UploadService {
         if (folderName == null || credential == null) {
             return null;
         }
-        return folderService.createFolder(credential.getUser().getId(), folderName, spaceId, null);
+        return folderRepository.findFolderByNameAndSpace_Id(folderName, spaceId)
+                .orElse(folderService.createFolder(credential.getUser().getId(), folderName, spaceId, null));
     }
 
     public String saveHandler(MultipartFile file, String fileName, String storageDirectory) throws IOException {
