@@ -11,6 +11,7 @@ import com.example.dam.service.FolderService;
 import com.example.dam.service.UploadService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +25,8 @@ import java.util.*;
 @AllArgsConstructor
 @Slf4j
 public class UploadServiceImpl implements UploadService {
-    private final String storageDirectory = "src/main/resources/storage";
+    @Value("${storage.url}")
+    private final String storageDirectory;
     private final CredentialRepository credentialRepository;
     private FolderService folderService;
     private final SpaceRepository spaceRepository;
@@ -34,10 +36,11 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public String upload(AssetInput assetInput, UUID spaceId, String apikey, String apiSecret) throws IOException {
-        Map<String, Object> attributes = buildUploadParams(assetInput.getOptions());
+        Map<String, Object> attributes = buildUploadParams(assetInput.getMetadata());
         Space space = getSpace(spaceId);
         Credential credential = credentialRepository.findByApiKeyAndSecretKey(apikey, apiSecret);
-        Folder folder = getOrCreateFolder((String) attributes.get("folder_name"), credential, spaceId);
+        String folderName = (String) attributes.get("folder");
+        Folder folder = getOrCreateFolder(folderName, credential, spaceId);
         String path = CommonService.filePathHandler(space, folder, assetInput.getFile().getOriginalFilename());
         String url = saveHandler(assetInput.getFile(), path, storageDirectory);
         Asset asset = new Asset(space, folder, assetInput.getFile().getName(), url, attributes.toString());
@@ -74,12 +77,13 @@ public class UploadServiceImpl implements UploadService {
         }
         Map<String, Object> params = new HashMap<>();
         params.put("public_id", options.get("public_id"));
-        params.put("folder_name", options.get("folder_name"));
+        params.put("folder", options.get("folder_name"));
         params.put("parent_folder", options.get("parent_folder"));
-        params.put("type", options.get("type"));
+        params.put("resource_type", options.get("resource_type"));
         params.put("display_name", options.get("display_name"));
         params.put("notification_url", options.get("notification_url"));
         return params;
     }
+
 
 }

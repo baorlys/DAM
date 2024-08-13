@@ -32,9 +32,11 @@ public class CommonService {
     }
 
     public static String filePathHandler(Space space, Folder folder, String fileName) {
-        String filePath = folder != null ? space.getName() + "/" + folder.getName() : space.getName();
-        return filePath + "/" + fileName;
+        String basePath = space.getTenant().getName() + "/" + space.getName();
+        String folderPath = (folder != null) ? "/" + folder.getName() : "";
+        return basePath + folderPath + "/" + fileName;
     }
+
 
 
 }
