@@ -16,7 +16,7 @@ import java.util.Map;
 public class ImageTransform implements ITransformable {
 
     @Override
-    public String transform(String filePath, Map<TransformVariable, String> options) throws IOException {
+    public void transform(String filePath, String outputPath, Map<TransformVariable, String> options) throws IOException {
         BufferedImage inputImage = ImageIO.read(new File(filePath));
         CommonService.throwIsNull(inputImage, "Image not found");
 
@@ -31,7 +31,6 @@ public class ImageTransform implements ITransformable {
         g2d.dispose();
 
         // Save the image
-        String outputPath = filePath.replace(".", "_transformed.");
         File output = new File(outputPath);
 
         ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
@@ -44,7 +43,6 @@ public class ImageTransform implements ITransformable {
         writer.write(null, new IIOImage(outputImage, null, null), param);
         writer.dispose();
 
-        return outputPath;
     }
 
 

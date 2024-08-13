@@ -3,8 +3,6 @@ package com.example.dam.service.transform;
 import com.example.dam.enums.TransformVariable;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Map;
 @Slf4j
@@ -18,8 +16,8 @@ public class VideoTransform implements ITransformable {
     );
 
     @Override
-    public String transform(String filePath, Map<TransformVariable, String> options) throws IOException, InterruptedException {
-        String outputPath = filePath.replace(".", "_transformed.");
+    public void transform(String filePath, String outputPath, Map<TransformVariable, String> options)
+            throws IOException, InterruptedException {
         String resolution = options.getOrDefault(TransformVariable.RESOLUTION, "1080p");
         String ffmpegCommand = buildFFmpegCommand(filePath, outputPath, resolution);
 
@@ -28,20 +26,10 @@ public class VideoTransform implements ITransformable {
 
         Process process = processBuilder.start();
 
-        // Capture and log FFmpeg output
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                log.info(line);
-            }
-        }
-
         int exitCode = process.waitFor();
         if (exitCode != 0) {
             throw new IOException("FFmpeg command failed with exit code " + exitCode);
         }
-
-        return outputPath;
     }
 
     private static String buildFFmpegCommand(String inputVideoPath, String outputVideoPath, String resolution) {
