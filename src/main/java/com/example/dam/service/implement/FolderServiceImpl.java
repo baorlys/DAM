@@ -9,6 +9,7 @@ import com.example.dam.service.CommonService;
 import com.example.dam.service.FolderService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -26,7 +27,8 @@ public class FolderServiceImpl implements FolderService {
     private final UserRepository userRepository;
     private final FolderRepository folderRepository;
     private final UserFolderRepository userFolderRepository;
-    private final String storageDirectory = "src/main/resources/storage";
+    @Value("${storage.url}")
+    private final String storageDirectory;
 
     @Override
     public Folder createFolder(UUID userId, String fName, UUID spaceId, UUID parentId) throws IOException {
