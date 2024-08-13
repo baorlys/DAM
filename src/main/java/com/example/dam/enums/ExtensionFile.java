@@ -1,6 +1,6 @@
 package com.example.dam.enums;
 
-public enum Format {
+public enum ExtensionFile {
     MP4,
     MOV,
     DOCS,

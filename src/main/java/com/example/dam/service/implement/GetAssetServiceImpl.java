@@ -6,7 +6,9 @@ import com.example.dam.enums.TransformVariable;
 import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
+import com.example.dam.model.Space;
 import com.example.dam.repository.AssetRepository;
+import com.example.dam.repository.SpaceRepository;
 import com.example.dam.service.CommonService;
 import com.example.dam.service.AccessService;
 import com.example.dam.service.GetAssetService;
@@ -22,16 +24,20 @@ import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.CredentialException;
 import java.io.IOException;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GetAssetServiceImpl implements GetAssetService {
     @Value("${storage.path}")
-    final String storagePath;
+    static final String STORAGE_PATH = "";
+
+    @Value("${storage.path.format}")
+    static final String PATH_FORMAT = "";
     AssetRepository assetRepository;
+
+    SpaceRepository spaceRepository;
     AccessService accessService;
 
     DamMapper mapper;
@@ -42,11 +48,19 @@ public class GetAssetServiceImpl implements GetAssetService {
     @Override
     public AssetDTO getAsset(ConfigurationInput key, String path, Map<String, String> options)
             throws CredentialException, IOException, InterruptedException {
-        path = storagePath + path;
-        boolean accessible = accessService.isAccessible(key.getApiKey(), key.getSecretKey(), path);
+        Space space = spaceRepository.findById(UUID.fromString(key.getSpaceId())).orElse(null);
+        CommonService.throwIsNotExists(space == null, "Space not found");
+
+        Objects.requireNonNull(space);
+        String buildPath = PATH_FORMAT
+                .replace("{tenant}", space.getTenant().getName())
+                .replace("{space}", space.getName())
+                .replace("{path}", path);
+
+        boolean accessible = accessService.isAccessible(key.getApiKey(), key.getSecretKey(), buildPath);
         CommonService.throwIsNotExists(!accessible, "Asset not accessible");
 
-        Asset asset = assetRepository.findByFilePath(path);
+        Asset asset = assetRepository.findByFilePath(buildPath);
         Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
 
         if (options.isEmpty()) {
@@ -58,7 +72,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         ITransformable transformable = TransformFactory.getTransform(resourceType);
 
         String outputPath = ITransformable.TRANSFORMED_PATH + asset.getFilePath();
-        transformable.transform(path,outputPath, convertToTransformVariable(options));
+        transformable.transform(buildPath,outputPath, convertToTransformVariable(options));
 
         asset.setFilePath(outputPath);
         return mapper.map(asset, AssetDTO.class);

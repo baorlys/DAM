@@ -1,5 +1,6 @@
 package com.example.dam.service;
 
+import com.example.dam.global.random.RandomId;
 import com.example.dam.model.Folder;
 import com.example.dam.model.Space;
 import org.webjars.NotFoundException;
@@ -38,5 +39,8 @@ public class CommonService {
     }
 
 
-
+    public String addRandomId(String path) {
+        String extension = path.substring(path.lastIndexOf("."));
+        return path.substring(0, path.lastIndexOf(".")) + RandomId.generateRandomId() + extension;
+    }
 }

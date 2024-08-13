@@ -1,6 +1,6 @@
 package com.example.dam.dto;
 
-import com.example.dam.enums.Format;
+import com.example.dam.enums.ExtensionFile;
 import com.example.dam.enums.ResourceType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ public class AssetDTO {
     String id;
     String name;
     ResourceType type;
-    Format format;
+    ExtensionFile extensionFile;
     long size;
     String filePath;
     String thumbnailUrl;
