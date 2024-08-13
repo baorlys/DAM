@@ -4,7 +4,7 @@ import com.example.dam.model.Asset;
 import com.example.dam.model.Credential;
 import com.example.dam.repository.*;
 import com.example.dam.service.AccessService;
-import com.example.dam.service.CommonService;
+import com.example.dam.global.service.CommonService;
 import graphql.com.google.common.base.Optional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

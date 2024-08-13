@@ -4,21 +4,21 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public enum ResourceType {
-    IMAGE(EnumSet.of(Format.PNG, Format.JPG, Format.GIF)),
-    VIDEO(EnumSet.of(Format.MP4, Format.MOV)),
-    FILE(EnumSet.of(Format.DOCS, Format.PDF, Format.PPT, Format.TXT));
+    IMAGE(EnumSet.of(ExtensionFile.PNG, ExtensionFile.JPG, ExtensionFile.GIF)),
+    VIDEO(EnumSet.of(ExtensionFile.MP4, ExtensionFile.MOV)),
+    FILE(EnumSet.of(ExtensionFile.DOCS, ExtensionFile.PDF, ExtensionFile.PPT, ExtensionFile.TXT));
 
-    private final Set<Format> validFormats;
+    private final Set<ExtensionFile> validExtensionFiles;
 
-    ResourceType(Set<Format> validFormats) {
-        this.validFormats = validFormats;
+    ResourceType(Set<ExtensionFile> validExtensionFiles) {
+        this.validExtensionFiles = validExtensionFiles;
     }
 
-    public Set<Format> getValidFormats() {
-        return validFormats;
+    public Set<ExtensionFile> getValidFormats() {
+        return validExtensionFiles;
     }
 
-    public boolean isValidFormat(Format format) {
-        return validFormats.contains(format);
+    public boolean isValidFormat(ExtensionFile extensionFile) {
+        return validExtensionFiles.contains(extensionFile);
     }
 }

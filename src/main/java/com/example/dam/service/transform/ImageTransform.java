@@ -1,7 +1,7 @@
 package com.example.dam.service.transform;
 
 import com.example.dam.enums.TransformVariable;
-import com.example.dam.service.CommonService;
+import com.example.dam.global.service.CommonService;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
