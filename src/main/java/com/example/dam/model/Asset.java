@@ -33,7 +33,9 @@ public class Asset {
     @Column(nullable = false)
     String filePath;
 
+    String thumbnailPath;
     String metadata;
+
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
