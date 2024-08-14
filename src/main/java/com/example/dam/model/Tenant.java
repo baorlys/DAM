@@ -26,6 +26,9 @@ public class Tenant {
     @JoinColumn(nullable = false)
     User ownedBy;
 
+    @Column(nullable = false)
+    boolean isDefault = false;
+
     @Column(updatable = false, nullable = false)
     @CreatedDate
     LocalDateTime createdAt = LocalDateTime.now();
