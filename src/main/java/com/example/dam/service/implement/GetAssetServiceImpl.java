@@ -5,7 +5,6 @@ import com.example.dam.dto.AssetDTO;
 import com.example.dam.enums.ResourceType;
 import com.example.dam.enums.TransformVariable;
 import com.example.dam.global.mapper.DamMapper;
-import com.example.dam.global.service.FileService;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.model.Space;
@@ -73,7 +72,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         String buildPath = buildFilePath(space, path);
 
         Asset asset = assetRepository.findByFilePath(buildPath);
-        File file = FileService.getFile(asset.getFilePath());
+        File file = new File(storageProperties.getPath() + asset.getFilePath());
         String contentType = type + "/" + getFileExtension(asset.getDisplayName());
         FileInputStream fileInputStream = new FileInputStream(file);
 
