@@ -21,6 +21,9 @@ public class User {
     @JoinColumn(nullable = false)
     Tenant tenant;
 
+    @ManyToOne
+    Role role;
+
     @Id
     @GeneratedValue
     UUID id;

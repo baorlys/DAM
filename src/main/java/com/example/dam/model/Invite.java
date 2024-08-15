@@ -34,7 +34,9 @@ public class Invite {
     String inviteeEmail;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    Role role;
+
+    @ManyToOne
     Space space;
 
     @Enumerated(EnumType.STRING)
