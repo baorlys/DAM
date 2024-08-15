@@ -20,12 +20,12 @@ public class UploadController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity upload(@ModelAttribute AssetInput assetInput,
-                                 @RequestHeader("X-API-Key") @NonNull String apikey,
-                                 @RequestHeader("X-API-Secret") @NonNull String apiSecret,
-                                 @RequestHeader("X-Space-ID") @NonNull String tenantId
+                                 @RequestHeader("X-API-Key") @NonNull String apiKey,
+                                 @RequestHeader("X-Secret-Key") @NonNull String secretKey,
+                                 @RequestHeader("X-Tenant-ID") @NonNull String tenantId
     ) throws IOException {
         UUID tenant = UUID.fromString(tenantId);
-        String url = uploadService.upload(assetInput, tenant, apikey, apiSecret);
+        String url = uploadService.upload(assetInput, tenant, apiKey, secretKey);
         return new ResponseEntity<>(url, HttpStatus.OK);
     }
 }

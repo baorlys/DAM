@@ -1,15 +1,19 @@
 package com.example.dam.controller;
 
+import com.example.dam.dto.FolderDTO;
 import com.example.dam.input.FolderInput;
 import com.example.dam.input.ShareFolderInput;
+import com.example.dam.input.TenantUserInput;
 import com.example.dam.model.Folder;
 import com.example.dam.service.FolderService;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -17,6 +21,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FolderController {
     private final FolderService folderService;
+    @GetMapping
+    public ResponseEntity<List<FolderDTO>> getSpaceFolders(@RequestParam(required = false, defaultValue = "0") String pageNum,
+                                                           @RequestParam(required = false, defaultValue = "10") String pageSize,
+                                                           @RequestParam(required = false) String sortBy,
+                                                           @RequestBody @NonNull TenantUserInput input
+    ) {
+        List<FolderDTO> dto = folderService.getAccessibleFolders(input, pageSize, pageNum, sortBy);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
 
     @GetMapping("{id}")
     public ResponseEntity getFolderByID(@PathVariable UUID id) {

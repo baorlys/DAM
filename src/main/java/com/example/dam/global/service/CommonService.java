@@ -2,8 +2,6 @@ package com.example.dam.global.service;
 
 import com.example.dam.exception.ExistsRecord;
 import com.example.dam.global.random.RandomId;
-import com.example.dam.model.Folder;
-import com.example.dam.model.Space;
 import org.webjars.NotFoundException;
 
 import javax.security.auth.login.CredentialException;
@@ -37,6 +35,10 @@ public class CommonService {
                 throw new NotFoundException("Object not exist");
             }
         }
+    }
+
+    public static boolean checkNull(Object o) {
+        return o != null;
     }
 
     public String addRandomId(String path) {

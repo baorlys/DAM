@@ -63,4 +63,6 @@ public class Asset {
         this.filePath = filePath;
         this.metadata = metadata;
     }
+
+
 }

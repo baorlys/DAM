@@ -3,9 +3,13 @@ package com.example.dam.service;
 import com.example.dam.input.AssetInput;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.MimeTypeUtils;
 
 import java.io.FileInputStream;
@@ -16,11 +20,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest
+@ActiveProfiles("test")
 class UploadServiceTest {
-    @Autowired
+    @Mock
     private UploadService uploadService;
-
     private String apiKey;
     private String apiSecret;
     private UUID spaceId;
@@ -30,6 +33,7 @@ class UploadServiceTest {
     private AssetInput assetInput;
     @BeforeEach
     void init() {
+        MockitoAnnotations.openMocks(this);
         apiKey = "api_key_1";
         apiSecret = "secret_key_1";
         spaceId = UUID.fromString("FC19AD23-C41C-4DB8-BA96-0A60DA84137B");
@@ -54,6 +58,7 @@ class UploadServiceTest {
                 MimeTypeUtils.IMAGE_PNG_VALUE, new FileInputStream(imgUrl));
         assetInput.setFile(imageFile);
         String response = uploadService.upload(assetInput, spaceId, apiKey, apiSecret);
+        System.out.println(response);
         assertNotNull(response);
     }
 

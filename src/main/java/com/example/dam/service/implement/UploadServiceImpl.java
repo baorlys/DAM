@@ -5,12 +5,12 @@ import com.example.dam.input.AssetInput;
 import com.example.dam.model.*;
 import com.example.dam.repository.*;
 import com.example.dam.global.service.CommonService;
-//import com.example.dam.service.FolderService;
 import com.example.dam.service.FolderService;
 import com.example.dam.service.UploadService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,32 +22,35 @@ import java.util.*;
 
 @Service
 @AllArgsConstructor
-@Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UploadServiceImpl implements UploadService {
-    private final StorageProperties storageProperties;
-    private final CredentialRepository credentialRepository;
-    private final FolderService folderService;
-    private final SpaceRepository spaceRepository;
-    private final AssetRepository assetRepository;
-
-    private final FolderRepository folderRepository;
-
-    private final TenantRepository tenantRepository;
-
-    private final ObjectMapper objectMapper;
+    private StorageProperties storageProperties;
+    private CredentialRepository credentialRepository;
+    private FolderService folderService;
+    private SpaceRepository spaceRepository;
+    private AssetRepository assetRepository;
+    private FolderRepository folderRepository;
+    private TenantRepository tenantRepository;
+    private ObjectMapper objectMapper;
 
     @Override
-    public String upload(AssetInput assetInput, UUID tenantId, String apikey, String apiSecret) throws IOException {
+    public String upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey) throws IOException {
         Map<String, Object> attributes = buildUploadParams(assetInput.getMetadata());
         Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
-        Credential credential = credentialRepository.findByApiKeyAndSecretKey(apikey, apiSecret);
+        CommonService.throwNotFound(tenant, "Can not find tenant");
+        Credential credential = credentialRepository.findByApiKeyAndSecretKey(apiKey, secretKey);
+        CommonService.throwNotFound(credential, "Can not find credential");
 
         String fName = (String) attributes.get("folder");
-        Space space = (Space) attributes.get("space");
+        Space space = getSpaceById(attributes.get("space_id"));
 
-        Folder folder = getFolder(tenant, credential.getUser(), space, fName);
-        String path = buildFilePath(tenant, space, folder, fName);
-        saveHandler(assetInput.getFile(), path, storageProperties.getPath());
+        Folder folder = findOrCreateFolder(tenant, credential.getUser(), space, fName);
+        String type = (String) attributes.get("type");
+
+        String path = buildPath(assetInput.getFile().getOriginalFilename(), tenant, space, folder, type);
+        saveFile(assetInput.getFile(),
+                buildPath(assetInput.getFile().getOriginalFilename(), tenant, space, folder, null),
+                storageProperties.getPath());
 
         Asset asset = new Asset();
         asset.setId(UUID.randomUUID());
@@ -62,30 +65,23 @@ public class UploadServiceImpl implements UploadService {
         return asset.getFilePath();
     }
 
-    private String buildFilePath(Tenant tenant, Space space, Folder folder, String fileName) {
-        String comma = "/";
-        StringBuilder pathBuilder = new StringBuilder().append(tenant.getId());
-        if (space != null) {
-            pathBuilder.append(comma).append(space.getId());
-        }
-        if (folder != null) {
-            pathBuilder.append(comma).append(folder.getName());
-        }
-        return pathBuilder.append(comma).append(fileName).toString();
+    private String buildPath(String fileName, Tenant tenant, Space space, Folder folder, String type) {
+        return tenant.getId().toString() + '/' +
+                (CommonService.checkNull(type) ? type + '/' : "") +
+                (CommonService.checkNull(space) ? space.getId().toString() + '/' : "") +
+                (CommonService.checkNull(folder) ? folder.getName() + '/' : "") +
+                fileName;
     }
 
-    private Folder getFolder(Tenant tenant, User user, Space space, String fName) throws IOException {
-        if (fName == null) {
+    private Folder findOrCreateFolder(Tenant tenant, User user, Space space, String folderName) {
+        if (folderName == null) {
             return null;
         }
-        Folder folder = folderRepository.findFolderByNameAndTenant_Id(fName, tenant.getId());
-        if (folder == null) {
-            return folderService.createFolder(user, fName, tenant, space);
-        }
-        return folder;
+        return Optional.ofNullable(folderRepository.findFolderByNameAndTenant_Id(folderName, tenant.getId()))
+                .orElseGet(() -> folderService.createFolder(user, folderName, tenant, space));
     }
 
-    public void saveHandler(MultipartFile file, String fileName, String storageDirectory) throws IOException {
+    public void saveFile(MultipartFile file, String fileName, String storageDirectory) throws IOException {
         Path filePath = Paths.get(storageDirectory, fileName);
         Path parentDir = filePath.getParent();
         if (parentDir != null) {
@@ -100,20 +96,21 @@ public class UploadServiceImpl implements UploadService {
         }
         Map<String, Object> params = new HashMap<>();
         params.put("public_id", options.get("public_id"));
-        params.put("space", getSpaceParam(options.get("space_id")));
+        params.put("space_id", options.get("space"));
         params.put("folder", options.get("folder_name"));
-        params.put("parent_folder", options.get("parent_folder"));
+        params.put("type", options.get("type"));
         params.put("resource_type", options.get("resource_type"));
         params.put("display_name", options.get("display_name"));
         params.put("notification_url", options.get("notification_url"));
         return params;
     }
 
-    private Space getSpaceParam(Object id) {
-        if (id == null) {
-            return null;
-        }
-        return spaceRepository.findById((UUID) id).orElse(null);
+    private Space getSpaceById(Object spaceId) {
+        return Optional.ofNullable(spaceId)
+                .map(id -> UUID.fromString(id.toString()))
+                .flatMap(spaceRepository::findById)
+                .orElse(null);
     }
+
 
 }
