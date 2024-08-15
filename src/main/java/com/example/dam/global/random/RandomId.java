@@ -7,7 +7,7 @@ public class RandomId {
     private RandomId() {
         // Empty constructor
     }
-    static final int ID_LENGTH = 8;
+    static final int ID_LENGTH = 6;
 
     public static String generateRandomId() {
         UUID uuid = UUID.randomUUID();

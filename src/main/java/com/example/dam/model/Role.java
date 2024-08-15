@@ -5,7 +5,6 @@ import lombok.experimental.FieldDefaults;
 
 import jakarta.persistence.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -18,13 +17,11 @@ public class Role {
     @JoinColumn(nullable = false)
     Tenant tenant;
 
+
     @Id
     @GeneratedValue
     UUID id;
 
     @Column(nullable = false)
     String name;
-
-    @ManyToMany
-    List<Permission> permissions;
 }

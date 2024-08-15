@@ -24,7 +24,7 @@
 //    @Test
 //    public void transformVideo() throws IOException, InterruptedException {
 //         ITransformable videoTransform = new VideoTransform();
-//         String path = "src/test/resources/test.mp4";
+//         String path = "src/test/resources/turtle.mp4";
 //         Map<TransformVariable, String> options = Map.of(TransformVariable.RESOLUTION, "144p");
 //         videoTransform.transform(path, options);
 //    }

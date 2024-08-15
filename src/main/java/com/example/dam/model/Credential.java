@@ -20,6 +20,7 @@ public class Credential {
     @JoinColumn(nullable = false)
     Tenant tenant;
 
+
     @Id
     @GeneratedValue
     UUID id;

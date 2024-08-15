@@ -6,18 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 public class AssetDTO {
-    String id;
-    String name;
+    UUID id;
+    String displayName;
     ResourceType type;
     ExtensionFile extensionFile;
     long size;
     String filePath;
     String thumbnailUrl;
-    String displayName;
     String originalFilename;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

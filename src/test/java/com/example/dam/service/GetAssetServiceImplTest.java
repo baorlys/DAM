@@ -59,7 +59,6 @@ class GetAssetServiceImplTest {
         Asset asset = assetRepository.findByFilePath("src/main/resources/storage/cup-on-a-table.jpg");
 
 
-
         // Execute
         AssetDTO result = getAssetService.getAsset(key, path, options);
 

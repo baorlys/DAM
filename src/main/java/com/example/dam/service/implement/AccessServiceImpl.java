@@ -32,10 +32,10 @@ public class AccessServiceImpl implements AccessService {
     @Override
     public boolean isAccessible(String apiKey, String secretKey, String filePath) throws CredentialException {
         Credential credential = credentialRepository.findByApiKeyAndSecretKey(apiKey, secretKey);
-        CommonService.throwIsNull(credential, "Credential not found");
+        CommonService.throwNotFound(credential, "Credential not found");
 
         Asset asset = assetRepository.findByFilePath(filePath);
-        CommonService.throwIsNull(asset, "Asset not found");
+        CommonService.throwNotFound(asset, "Asset not found");
 
         boolean hasAccessSpace = userSpaceRepository.hasAccess(credential.getUser().getId(), asset.getFolder().getSpace().getId());
         CommonService.throwIsNotExists(!hasAccessSpace, "User does not have access to the space");

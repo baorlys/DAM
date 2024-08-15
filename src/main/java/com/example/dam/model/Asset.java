@@ -19,6 +19,8 @@ public class Asset {
     @ManyToOne
     @JoinColumn(nullable = false)
     Tenant tenant;
+
+
     @Id
     @GeneratedValue
     UUID id;
