@@ -15,6 +15,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSpace {
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    Tenant tenant;
     @Id
     @GeneratedValue
     UUID id;

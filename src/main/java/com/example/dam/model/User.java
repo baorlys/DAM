@@ -17,14 +17,18 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    Tenant tenant;
+
     @Id
     @GeneratedValue
     UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     String email;
 
     @Column(nullable = false)
@@ -37,5 +41,7 @@ public class User {
     @LastModifiedDate
     @Column(nullable = false)
     LocalDateTime updatedAt = LocalDateTime.now();
+
+    boolean isActivated = false;
 }
 

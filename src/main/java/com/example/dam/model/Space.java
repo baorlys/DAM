@@ -15,13 +15,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Space {
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    Tenant tenant;
+
+
     @Id
     @GeneratedValue
     UUID id;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    Tenant tenant;
 
     @Column(nullable = false)
     String name;

@@ -15,6 +15,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Folder {
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    Tenant tenant;
     @Id
     @GeneratedValue
     UUID id;
@@ -36,6 +39,8 @@ public class Folder {
     @LastModifiedDate
     @Column(nullable = false)
     LocalDateTime updatedAt = LocalDateTime.now();
+
+    boolean isDeleted = false;
 
     public Folder(Space space, Folder parent, String name) {
         this.id = UUID.randomUUID();

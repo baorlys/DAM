@@ -16,6 +16,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserFolder {
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    Tenant tenant;
     @Id
     @GeneratedValue
     UUID id;
@@ -26,20 +29,9 @@ public class UserFolder {
     @ManyToOne
     Folder folder;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    Access accessLevel;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    Role role;
 
-    public enum Access {
-        READ,
-        WRITE,
-        ADMIN
-    }
 
-    public UserFolder(User user, Folder folder, Access accessLevel) {
-        this.id = UUID.randomUUID();
-        this.user = user;
-        this.folder = folder;
-        this.accessLevel = accessLevel;
-    }
 }

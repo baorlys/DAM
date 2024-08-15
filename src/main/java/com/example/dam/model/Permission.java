@@ -1,11 +1,12 @@
 package com.example.dam.model;
 
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import jakarta.persistence.*;
-
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -13,7 +14,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
+public class Permission {
     @ManyToOne
     @JoinColumn(nullable = false)
     Tenant tenant;
@@ -24,7 +25,4 @@ public class Role {
 
     @Column(nullable = false)
     String name;
-
-    @ManyToMany
-    List<Permission> permissions;
 }
