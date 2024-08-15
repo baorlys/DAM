@@ -16,7 +16,7 @@
 //    @Test
 //    public void transformImage() throws IOException, InterruptedException {
 //        ITransformable imageTransform = new ImageTransform();
-//        String path = "src/test/resources/cup-on-a-table.jpg";
+//        String path = "src/test/resources/test-image.jpg";
 //        Map<TransformVariable, String> options = Map.of(TransformVariable.WIDTH, "100", TransformVariable.HEIGHT, "100", TransformVariable.QUALITY, "100");
 //        imageTransform.transform(path, options);
 //    }

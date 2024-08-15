@@ -4,12 +4,16 @@ import com.example.dam.config.StorageProperties;
 import com.example.dam.dto.AssetDTO;
 import com.example.dam.enums.ResourceType;
 import com.example.dam.enums.TransformVariable;
+import com.example.dam.exception.NotFoundException;
 import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.model.Space;
+import com.example.dam.model.Tenant;
 import com.example.dam.repository.AssetRepository;
+import com.example.dam.repository.FolderRepository;
 import com.example.dam.repository.SpaceRepository;
+import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.AccessService;
 import com.example.dam.service.GetAssetService;
 import com.example.dam.service.HandleAssetService;
@@ -35,7 +39,9 @@ import java.util.*;
 public class GetAssetServiceImpl implements GetAssetService {
     StorageProperties storageProperties;
     AssetRepository assetRepository;
+    TenantRepository tenantRepository;
     SpaceRepository spaceRepository;
+    FolderRepository folderRepository;
     AccessService accessService;
     HandleAssetService handleAssetService;
     DamMapper mapper;
@@ -44,9 +50,9 @@ public class GetAssetServiceImpl implements GetAssetService {
 
     @Override
     public AssetDTO getAsset(ConfigurationInput key, String path, Map<String, String> options)
-            throws CredentialException, IOException, InterruptedException {
-        Space space = getSpace(key.getSpaceId());
-        String buildPath = buildFilePath(space, path);
+            throws CredentialException, IOException, InterruptedException, NotFoundException {
+        Tenant tenant = getTenant(key.getTenantId());
+        String buildPath = buildFilePath(tenant, path);
 
         checkAccess(key.getApiKey(), key.getSecretKey(), buildPath);
 
@@ -57,8 +63,8 @@ public class GetAssetServiceImpl implements GetAssetService {
             return mapper.map(asset, AssetDTO.class);
         }
 
-        ResourceType resourceType = ResourceType.valueOf(metadata.get("resourceType").toUpperCase());
-        String outputPath = ITransformable.TRANSFORMED_PATH + asset.getFilePath();
+        ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
+        String outputPath = storageProperties.getTransformPath() + buildPath;
         handleAssetService.transform(resourceType, buildPath, outputPath, convertToTransformVariable(options));
 
         asset.setFilePath(outputPath);
@@ -66,13 +72,26 @@ public class GetAssetServiceImpl implements GetAssetService {
     }
 
     @Override
-    public MultipartFile getAssetFile(String spaceId, String type, String path, Map<String, String> options)
-            throws CredentialException, IOException {
-        Space space = getSpace(spaceId);
-        String buildPath = buildFilePath(space, path);
+    public MultipartFile getAssetFile(String tenantId, String type, String path, Map<String, String> options)
+            throws IOException, NotFoundException, InterruptedException {
+        Tenant tenant = getTenant(tenantId);
+        String buildPath = buildFilePath(tenant, path);
 
         Asset asset = assetRepository.findByFilePath(buildPath);
-        File file = new File(storageProperties.getPath() + asset.getFilePath());
+        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
+
+        String outputPath = storageProperties.getPath() + buildPath;
+
+        if (!options.isEmpty()) {
+            ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
+            outputPath = storageProperties.getTransformPath() + buildPath;
+            handleAssetService.transform(resourceType, storageProperties.getPath() + buildPath, outputPath,
+                    convertToTransformVariable(options));
+
+            asset.setFilePath(outputPath);
+        }
+
+        File file = new File(outputPath);
         String contentType = type + "/" + getFileExtension(asset.getDisplayName());
         FileInputStream fileInputStream = new FileInputStream(file);
 
@@ -84,23 +103,22 @@ public class GetAssetServiceImpl implements GetAssetService {
         );
     }
 
+    private Tenant getTenant(String tenantId) throws NotFoundException {
+        return tenantRepository.findById(UUID.fromString(tenantId))
+                .orElseThrow(() -> new NotFoundException("Tenant not found"));
+    }
+
     @Override
-    public String getFilePath(String spaceId, String path) throws CredentialException {
-        Space space = getSpace(spaceId);
-        String buildPath = buildFilePath(space, path);
+    public String getFilePath(String tenantId, String path) throws NotFoundException {
+        Tenant tenant = getTenant(tenantId);
+        String buildPath = buildFilePath(tenant, path);
         Asset asset = assetRepository.findByFilePath(buildPath);
         return storageProperties.getPath() + asset.getFilePath();
     }
 
-    private Space getSpace(String spaceId) throws CredentialException {
-        return spaceRepository.findById(UUID.fromString(spaceId))
-                .orElseThrow(() -> new CredentialException("Space not found"));
-    }
-
-    private String buildFilePath(Space space, String path) {
+    private String buildFilePath(Tenant tenant, String path) {
         return storageProperties.getPathFormat()
-                .replace("{tenant}", space.getTenant().getId().toString())
-                .replace("{space}", space.getId().toString())
+                .replace("{tenant}", tenant.getId().toString())
                 .replace("{path}", path);
     }
 

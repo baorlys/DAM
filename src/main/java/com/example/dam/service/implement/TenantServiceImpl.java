@@ -29,13 +29,14 @@ public class TenantServiceImpl implements TenantService {
 
 
     @Override
-    public void createTenant(String tenantName) throws ExistsRecord {
+    public UUID createTenant(String tenantName) throws ExistsRecord {
         boolean isExist = isTenantExist(tenantName);
         CommonService.throwIsExist(isExist, "Tenant already exist");
 
         Tenant tenant = new Tenant();
         tenant.setName(tenantName);
         tenantRepository.save(tenant);
+        return tenant.getId();
     }
 
     @Override
