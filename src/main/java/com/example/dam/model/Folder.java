@@ -18,6 +18,7 @@ public class Folder {
     @ManyToOne
     @JoinColumn(nullable = false)
     Tenant tenant;
+
     @Id
     @GeneratedValue
     UUID id;

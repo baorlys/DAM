@@ -5,13 +5,13 @@ import com.example.dam.dto.AssetDTO;
 import com.example.dam.enums.ResourceType;
 import com.example.dam.enums.TransformVariable;
 import com.example.dam.global.mapper.DamMapper;
+import com.example.dam.global.service.FileService;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.model.Space;
 import com.example.dam.repository.AssetRepository;
 import com.example.dam.repository.SpaceRepository;
 import com.example.dam.service.AccessService;
-import com.example.dam.service.FileService;
 import com.example.dam.service.GetAssetService;
 import com.example.dam.service.HandleAssetService;
 import com.example.dam.service.transform.ITransformable;
@@ -39,7 +39,6 @@ public class GetAssetServiceImpl implements GetAssetService {
     SpaceRepository spaceRepository;
     AccessService accessService;
     HandleAssetService handleAssetService;
-    FileService fileService;
     DamMapper mapper;
     ObjectMapper objectMapper;
 
@@ -74,7 +73,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         String buildPath = buildFilePath(space, path);
 
         Asset asset = assetRepository.findByFilePath(buildPath);
-        File file = fileService.getFile(asset.getFilePath());
+        File file = FileService.getFile(asset.getFilePath());
         String contentType = type + "/" + getFileExtension(asset.getDisplayName());
         FileInputStream fileInputStream = new FileInputStream(file);
 
@@ -101,8 +100,8 @@ public class GetAssetServiceImpl implements GetAssetService {
 
     private String buildFilePath(Space space, String path) {
         return storageProperties.getPathFormat()
-                .replace("{tenant}", space.getTenant().getName())
-                .replace("{space}", space.getName())
+                .replace("{tenant}", space.getTenant().getId().toString())
+                .replace("{space}", space.getId().toString())
                 .replace("{path}", path);
     }
 

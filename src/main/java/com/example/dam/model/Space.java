@@ -20,6 +20,7 @@ public class Space {
     Tenant tenant;
 
 
+
     @Id
     @GeneratedValue
     UUID id;

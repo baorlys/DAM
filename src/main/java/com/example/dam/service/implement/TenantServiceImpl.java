@@ -1,7 +1,12 @@
 package com.example.dam.service.implement;
 
-import com.example.dam.global.random.RandomId;
+import com.example.dam.dto.AssetDTO;
+import com.example.dam.dto.TenantDTO;
+import com.example.dam.exception.ExistsRecord;
+import com.example.dam.global.mapper.DamMapper;
+import com.example.dam.global.service.CommonService;
 import com.example.dam.model.Tenant;
+import com.example.dam.repository.AssetRepository;
 import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.TenantService;
 import lombok.AccessLevel;
@@ -9,14 +14,25 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 @Service
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TenantServiceImpl implements TenantService {
     TenantRepository tenantRepository;
+    AssetRepository assetRepository;
+    DamMapper damMapper;
+
+
 
     @Override
-    public void createTenant(String tenantName) {
+    public void createTenant(String tenantName) throws ExistsRecord {
+        boolean isExist = isTenantExist(tenantName);
+        CommonService.throwIsExist(isExist, "Tenant already exist");
+
         Tenant tenant = new Tenant();
         tenant.setName(tenantName);
         tenantRepository.save(tenant);
@@ -24,12 +40,24 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public void deleteTenant(String tenantId) {
+        Tenant readyDel = tenantRepository.findById(UUID.fromString(tenantId)).orElse(null);
+        CommonService.throwNotFound(readyDel, "Tenant not found");
 
+        Objects.requireNonNull(readyDel);
+        tenantRepository.delete(readyDel);
     }
 
     @Override
-    public void switchTenant(String tenantId) {
+    public TenantDTO switchTenant(String tenantId) {
+        Tenant tenant = tenantRepository.findById(UUID.fromString(tenantId)).orElse(null);
+        CommonService.throwNotFound(tenant, "Tenant not found");
 
+        Objects.requireNonNull(tenant);
+        AssetDTO[] assets = damMapper.map(assetRepository.findAllByTenantId(tenant.getId()), AssetDTO[].class);
+        TenantDTO tenantDTO = damMapper.map(tenant, TenantDTO.class);
+        tenantDTO.setAssets(List.of(assets));
+
+        return tenantDTO;
     }
 
     boolean isTenantExist(String tenantName) {

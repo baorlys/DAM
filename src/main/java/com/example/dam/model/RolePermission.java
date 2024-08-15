@@ -18,6 +18,7 @@ public class RolePermission {
     @ManyToOne
     @JoinColumn(nullable = false)
     Tenant tenant;
+
     @Id
     @GeneratedValue
     UUID id;

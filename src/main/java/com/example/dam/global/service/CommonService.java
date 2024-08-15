@@ -1,5 +1,6 @@
 package com.example.dam.global.service;
 
+import com.example.dam.exception.ExistsRecord;
 import com.example.dam.global.random.RandomId;
 import com.example.dam.model.Folder;
 import com.example.dam.model.Space;
@@ -12,15 +13,21 @@ public class CommonService {
         // Empty constructor
     }
 
-    public static void throwIsNull(Object obj, String msg) throws NullPointerException {
+    public static void throwNotFound(Object obj, String msg) throws NotFoundException {
         if (obj == null) {
-            throw new NullPointerException(msg);
+            throw new NotFoundException(msg);
         }
     }
 
     public static void throwIsNotExists(boolean isNotExists, String msg) throws CredentialException {
         if (isNotExists) {
             throw new CredentialException(msg);
+        }
+    }
+
+    public static void throwIsExist(boolean isNotExists, String msg) throws ExistsRecord {
+        if (isNotExists) {
+            throw new ExistsRecord(msg);
         }
     }
 
@@ -33,7 +40,7 @@ public class CommonService {
     }
 
     public static String filePathHandler(Space space, Folder folder, String fileName) {
-        String basePath = space.getTenant().getName() + "/" + space.getName();
+        String basePath = space.getTenant().getId() + "/" + space.getName();
         String folderPath = (folder != null) ? "/" + folder.getName() : "";
         return basePath + folderPath + "/" + fileName;
     }

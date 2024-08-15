@@ -18,7 +18,7 @@ public class ImageTransform implements ITransformable {
     @Override
     public void transform(String filePath, String outputPath, Map<TransformVariable, String> options) throws IOException {
         BufferedImage inputImage = ImageIO.read(new File(filePath));
-        CommonService.throwIsNull(inputImage, "Image not found");
+        CommonService.throwNotFound(inputImage, "Image not found");
 
         int width = Integer.parseInt(options.getOrDefault(TransformVariable.WIDTH, String.valueOf(inputImage.getWidth())));
         int height = Integer.parseInt(options.getOrDefault(TransformVariable.HEIGHT, String.valueOf(inputImage.getHeight())));

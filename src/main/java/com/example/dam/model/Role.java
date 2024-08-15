@@ -17,6 +17,7 @@ public class Role {
     @JoinColumn(nullable = false)
     Tenant tenant;
 
+
     @Id
     @GeneratedValue
     UUID id;
