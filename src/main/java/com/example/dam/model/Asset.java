@@ -16,24 +16,30 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Asset {
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    Tenant tenant;
     @Id
     @GeneratedValue
     UUID id;
 
+    String publicId;
+
     @ManyToOne
-    @JoinColumn(nullable = false)
     Space space;
 
     @ManyToOne
     Folder folder;
 
     @Column(nullable = false)
-    String name;
+    String displayName;
 
     @Column(nullable = false)
     String filePath;
 
     String thumbnailPath;
+
+
     String metadata;
 
 
@@ -45,11 +51,13 @@ public class Asset {
     @Column(nullable = false)
     LocalDateTime updatedAt = LocalDateTime.now();
 
-    public Asset(Space space, Folder folder, String name, String filePath, String metadata) {
+    boolean isDeleted = false;
+
+    public Asset(Space space, Folder folder, String displayName, String filePath, String metadata) {
         this.id = UUID.randomUUID();
         this.space = space;
         this.folder = folder;
-        this.name = name;
+        this.displayName = displayName;
         this.filePath = filePath;
         this.metadata = metadata;
     }

@@ -22,10 +22,6 @@ public class Tenant {
     @Column(nullable = false, unique = true)
     String name;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    User ownedBy;
-
     @Column(updatable = false, nullable = false)
     @CreatedDate
     LocalDateTime createdAt = LocalDateTime.now();
@@ -33,4 +29,5 @@ public class Tenant {
     @Column(nullable = false)
     @LastModifiedDate
     LocalDateTime updatedAt = LocalDateTime.now();
+
 }
