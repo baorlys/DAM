@@ -1,5 +1,6 @@
 package com.example.dam.model;
 
+import com.example.dam.enums.Status;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -19,7 +20,6 @@ public class Credential {
     @ManyToOne
     @JoinColumn(nullable = false)
     Tenant tenant;
-
 
     @Id
     @GeneratedValue
@@ -46,9 +46,4 @@ public class Credential {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     Status status;
-
-    public enum Status {
-        ACTIVE,
-        INACTIVE
-    }
 }

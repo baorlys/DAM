@@ -44,9 +44,6 @@ public class AccessServiceImpl implements AccessService {
                 .transform(folder -> userFolderRepository.hasAccess(credential.getUser().getId(), folder.getId()))
                 .or(true);
         CommonService.throwIsNotExists(!hasAccessFolder, "User does not have access to the folder");
-
         return true;
-
-
     }
 }
