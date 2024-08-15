@@ -39,13 +39,6 @@ public class CommonService {
         }
     }
 
-    public static String filePathHandler(Space space, Folder folder, String fileName) {
-        String basePath = space.getTenant().getId() + "/" + space.getName();
-        String folderPath = (folder != null) ? "/" + folder.getName() : "";
-        return basePath + folderPath + "/" + fileName;
-    }
-
-
     public String addRandomId(String path) {
         String extension = path.substring(path.lastIndexOf("."));
         return path.substring(0, path.lastIndexOf(".")) + RandomId.generateRandomId() + extension;

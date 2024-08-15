@@ -1,9 +1,5 @@
 package com.example.dam.service.transform;
 
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 
@@ -84,15 +80,15 @@ public class UtilsTransform {
     }
 
     public static void convertDocxToPdf(String docxPath, String pdfPath) throws IOException {
-        try (FileInputStream fis = new FileInputStream(docxPath);
-             XWPFDocument docx = new XWPFDocument(fis);
-             PdfWriter writer = new PdfWriter(pdfPath);
-             PdfDocument pdf = new PdfDocument(writer);
-             Document pdfDoc = new Document(pdf)) {
-
-            for (XWPFParagraph paragraph : docx.getParagraphs()) {
-                pdfDoc.add(new Paragraph(paragraph.getText()));
-            }
-        }
+//        try (FileInputStream fis = new FileInputStream(docxPath);
+//             XWPFDocument docx = new XWPFDocument(fis);
+//             PdfWriter writer = new PdfWriter(pdfPath);
+//             PdfDocument pdf = new PdfDocument(writer);
+//             Document pdfDoc = new Document(pdf)) {
+//
+//            for (XWPFParagraph paragraph : docx.getParagraphs()) {
+//                pdfDoc.add(new Paragraph(paragraph.getText()));
+//            }
+//        }
     }
 }
