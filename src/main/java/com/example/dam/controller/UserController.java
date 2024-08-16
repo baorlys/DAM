@@ -32,4 +32,5 @@ public class UserController {
         tenantService.deleteTenant(tenantId);
         return ResponseEntity.ok().build();
     }
+
 }

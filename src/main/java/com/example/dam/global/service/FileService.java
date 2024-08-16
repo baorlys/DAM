@@ -12,6 +12,12 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 public class FileService {
+
+    public static String extractExtension(String fileName) {
+        int dotIndex = fileName.lastIndexOf('.');
+        return fileName.substring(dotIndex + 1);
+    }
+
     public static String buildRelativePath(String fileName) {
         int dotIndex = fileName.lastIndexOf('.');
         String name = fileName.substring(0, dotIndex);

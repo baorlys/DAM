@@ -12,6 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AssetDTO {
     UUID id;
+    String publicId;
     String displayName;
     ResourceType type;
     ExtensionFile extensionFile;

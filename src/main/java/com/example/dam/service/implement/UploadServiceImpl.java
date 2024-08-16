@@ -1,12 +1,17 @@
 package com.example.dam.service.implement;
 
 import com.example.dam.config.StorageProperties;
+import com.example.dam.dto.AssetDTO;
+import com.example.dam.enums.ResourceType;
+import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.global.service.FileService;
 import com.example.dam.input.AssetInput;
 import com.example.dam.model.*;
 import com.example.dam.repository.*;
 import com.example.dam.global.service.CommonService;
+import com.example.dam.service.AccessService;
 import com.example.dam.service.FolderService;
+import com.example.dam.service.HandleAssetService;
 import com.example.dam.service.UploadService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
@@ -15,10 +20,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.security.auth.login.CredentialException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -33,26 +36,39 @@ public class UploadServiceImpl implements UploadService {
     private FolderRepository folderRepository;
     private TenantRepository tenantRepository;
     private ObjectMapper objectMapper;
+    private AccessService accessService;
+    private HandleAssetService handleAssetService;
+    private DamMapper damMapper;
 
     @Override
-    public String upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey) throws IOException {
+    public AssetDTO upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey) throws IOException, CredentialException, InterruptedException {
         // build params
         Map<String, Object> attributes = buildUploadParams(assetInput.getMetadata());
+        MultipartFile file = assetInput.getFile();
 
         //check tenant and credential
         Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
         CommonService.throwNotFound(tenant, "Can not find tenant");
         Credential credential = credentialRepository.findByApiKeyAndSecretKey(apiKey, secretKey);
-        CommonService.throwNotFound(credential, "Can not find credential");
 
-        // save to storage
+        // check credential
         String fName = (String) attributes.get("folder");
         Space space = getSpaceById(attributes.get("space_id"));
+        String originName = file.getOriginalFilename();
         Folder folder = findOrCreateFolder(tenant, credential.getUser(), space, fName);
-        String path = FileService.buildRelativePath(assetInput.getFile().getOriginalFilename());
-        FileService.saveFile(assetInput.getFile(),
-                FileService.buildAbsolutePath(path, tenant, space, folder),
-                storageProperties.getPath());
+        String path = FileService.buildRelativePath(Objects.requireNonNull(originName));
+//        accessService.isAccessible(apiKey, secretKey, path);
+
+        // save asset and thumbnail
+        String absolutePath = FileService.buildAbsolutePath(path, tenant, space, folder);
+        FileService.saveFile(file, absolutePath, storageProperties.getPath());
+        String thumbnail = storageProperties.getThumbnailPath() + path;
+        handleAssetService.generateThumbnail((ResourceType) attributes.get("resource_type"), storageProperties.getPath() + absolutePath, thumbnail, 300);
+
+        // handle file information
+        attributes.put("size", file.getSize());
+        attributes.put("origin_name", originName);
+        attributes.put("extension", FileService.extractExtension(originName));
 
         // save to database
         Asset asset = new Asset();
@@ -63,11 +79,10 @@ public class UploadServiceImpl implements UploadService {
         asset.setMetadata(objectMapper.writeValueAsString(attributes));
         asset.setPublicId(UUID.randomUUID().toString());
         asset.setFilePath(path);
-        asset.setDisplayName(assetInput.getFile().getOriginalFilename());
-        assetRepository.save(asset);
-        return asset.getFilePath();
+        asset.setDisplayName(file.getOriginalFilename());
+        asset.setThumbnailPath(thumbnail);
+        return damMapper.mapAsset(assetRepository.save(asset));
     }
-
 
 
     private Folder findOrCreateFolder(Tenant tenant, User user, Space space, String folderName) {
@@ -79,7 +94,6 @@ public class UploadServiceImpl implements UploadService {
     }
 
 
-
     private Map<String, Object> buildUploadParams(Map<String, String> options) {
         if (options == null) {
             options = Collections.emptyMap();
@@ -89,7 +103,7 @@ public class UploadServiceImpl implements UploadService {
         params.put("space_id", options.get("space"));
         params.put("folder", options.get("folder_name"));
         params.put("type", options.get("type"));
-        params.put("resource_type", options.get("resource_type"));
+        params.put("resource_type", CommonService.findResourceType(options.get("resource_type")));
         params.put("display_name", options.get("display_name"));
         params.put("notification_url", options.get("notification_url"));
         return params;
