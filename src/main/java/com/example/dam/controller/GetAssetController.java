@@ -1,6 +1,7 @@
 package com.example.dam.controller;
 
 import com.example.dam.dto.AssetDTO;
+import com.example.dam.exception.NotFoundException;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.service.GetAssetService;
 import jakarta.annotation.Nullable;
@@ -35,51 +36,49 @@ public class GetAssetController {
     @GetMapping("/{path}")
     public ResponseEntity<AssetDTO> getAsset(@PathVariable String path,
                                              @RequestParam @Nullable Map<String, String> options,
-                                             @RequestHeader("X-Space-ID") @NotEmpty String spaceId,
+                                             @RequestHeader("X-Tenant-ID") @NotEmpty String tenantId,
                                              @RequestHeader("X-API-Key") @NotEmpty String apiKey,
                                              @RequestHeader("X-Secret-Key") @NotEmpty String secretKey)
-            throws CredentialException, IOException, InterruptedException {
+            throws CredentialException, IOException, InterruptedException, NotFoundException {
         ConfigurationInput key = new ConfigurationInput();
-        key.setSpaceId(spaceId);
+        key.setTenantId(tenantId);
         key.setApiKey(apiKey);
         key.setSecretKey(secretKey);
         return ResponseEntity.ok(getAssetService.getAsset(key, path, options));
     }
 
-    @GetMapping("/{spaceId}/image/{path}")
-    public ResponseEntity<InputStreamResource> getImageFile(@PathVariable String spaceId,
-                                                  @PathVariable String path)
-        throws CredentialException, IOException, InterruptedException {
+    @GetMapping("/{tenantId}/image/{path}")
+    public ResponseEntity<InputStreamResource> getImageFile(@PathVariable String tenantId,
+                                                            @PathVariable String path,
+                                                            @RequestParam @Nullable Map<String, String> options)
+            throws CredentialException, IOException, InterruptedException, NotFoundException {
 
-        MultipartFile multipartFile = getAssetService.getAssetFile(spaceId, "image",  path, Map.of());
+        MultipartFile multipartFile = getAssetService.getAssetFile(tenantId, "image", path, options);
 
-        // Create an InputStreamResource from the MultipartFile input stream
         InputStream inputStream = multipartFile.getInputStream();
-
-        // Determine the media type (content type) based on the file extension
         String contentType = multipartFile.getContentType();
-        // Build the HTTP headers for the response
+
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, contentType);
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + multipartFile.getOriginalFilename());
 
-        // Return the file as a ResponseEntity with an InputStreamResource
         return new ResponseEntity<>(new InputStreamResource(inputStream), headers, HttpStatus.OK);
     }
 
-    @GetMapping("/{spaceId}/video/{path}")
-    public ResponseEntity<Resource> streamVideo(@PathVariable String spaceId, @PathVariable String path, HttpServletRequest request)
-            throws IOException, InterruptedException, CredentialException {
-        // Retrieve the file path
-        String filePath = getAssetService.getFilePath(spaceId, path); // Adjust this method to return the file path
+
+
+    @GetMapping("/{tenantId}/video/{path}")
+    public ResponseEntity<Resource> streamVideo(@PathVariable String tenantId,
+                                                @PathVariable String path,
+                                                @RequestParam @Nullable Map<String, String> options,
+                                                HttpServletRequest request)
+            throws IOException, InterruptedException, CredentialException, NotFoundException {
+        String filePath = getAssetService.getFilePath(tenantId, path);
         File file = new File(filePath);
 
-        // Read file content into a byte array
         byte[] fileBytes = Files.readAllBytes(file.toPath());
+        String contentType = getAssetService.getAssetFile(tenantId, "video", path, options).getContentType();
 
-        String contentType = getAssetService.getAssetFile(spaceId, "video",  path, Map.of()).getContentType();
-
-        // Handle range requests for partial content
         String rangeHeader = request.getHeader(HttpHeaders.RANGE);
         if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
             String[] ranges = rangeHeader.substring("bytes=".length()).split("-");
@@ -90,26 +89,26 @@ public class GetAssetController {
                 return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE).build();
             }
 
-            // Create a subarray of the file bytes
             byte[] partialContent = new byte[(int) (end - start + 1)];
             System.arraycopy(fileBytes, (int) start, partialContent, 0, partialContent.length);
 
-            // Return the partial content
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_TYPE, contentType);
             headers.add(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileBytes.length);
             headers.add(HttpHeaders.ACCEPT_RANGES, "bytes");
             headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(partialContent.length));
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + file.getName());
 
             return new ResponseEntity<>(new ByteArrayResource(partialContent), headers, HttpStatus.PARTIAL_CONTENT);
         }
 
-        // Return the entire file if no range is requested
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, contentType);
         headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileBytes.length));
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + file.getName());
 
         return new ResponseEntity<>(new ByteArrayResource(fileBytes), headers, HttpStatus.OK);
     }
+
 
 }

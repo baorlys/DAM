@@ -33,7 +33,7 @@
 //    @Test
 //    void imageThumbnail() throws IOException, InterruptedException {
 //        iGenerateThumbnail = new ImageThumbnail();
-//        String path = "src/test/resources/cup-on-a-table.jpg";
+//        String path = "src/test/resources/test-image.jpg";
 //        String outputPath = commonService.addRandomId("src/test/resources/thumbnail/image.jpg");
 //
 //        iGenerateThumbnail.generateThumbnail(path, outputPath, 300);
