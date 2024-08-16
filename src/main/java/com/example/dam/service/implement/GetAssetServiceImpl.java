@@ -50,9 +50,9 @@ public class GetAssetServiceImpl implements GetAssetService {
         Tenant tenant = getTenant(key.getTenantId());
         String buildPath = buildFilePath(tenant, path);
 
-        checkAccess(key.getApiKey(), key.getSecretKey(), buildPath);
+        checkAccess(key.getApiKey(), key.getSecretKey(), path);
 
-        Asset asset = assetRepository.findByFilePath(buildPath);
+        Asset asset = assetRepository.findByFilePath(path);
         Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
 
         if (options.isEmpty()) {
@@ -73,13 +73,13 @@ public class GetAssetServiceImpl implements GetAssetService {
         Tenant tenant = getTenant(tenantId);
         String buildPath = buildFilePath(tenant, path);
 
-        Asset asset = assetRepository.findByFilePath(buildPath);
+        Asset asset = assetRepository.findByFilePath(path);
         Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
 
         String outputPath = storageProperties.getPath() + buildPath;
 
         if (!options.isEmpty()) {
-            ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
+            ResourceType resourceType = ResourceType.valueOf(metadata.get(" resource_type").toUpperCase());
             outputPath = storageProperties.getTransformPath() + buildPath;
             handleAssetService.transform(resourceType, storageProperties.getPath() + buildPath, outputPath,
                     convertToTransformVariable(options));

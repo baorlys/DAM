@@ -51,7 +51,7 @@ public class UploadServiceImpl implements UploadService {
         Folder folder = findOrCreateFolder(tenant, credential.getUser(), space, fName);
         String path = FileService.buildRelativePath(assetInput.getFile().getOriginalFilename());
         FileService.saveFile(assetInput.getFile(),
-                FileService.buildAbsolutePath(assetInput.getFile().getOriginalFilename(), tenant, space, folder),
+                FileService.buildAbsolutePath(path, tenant, space, folder),
                 storageProperties.getPath());
 
         // save to database
