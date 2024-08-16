@@ -15,5 +15,5 @@ public interface FolderService {
     void deleteFolder(UUID folderId);
     Folder getFolderById(UUID folderId);
 
-    List<FolderDTO> getAccessibleFolders(TenantUserInput input, String pageSize, String pageNum, String sortBy);
+    List<FolderDTO> getAccessibleFolders(UUID input, String pageSize, String pageNum, String sortBy);
 }
