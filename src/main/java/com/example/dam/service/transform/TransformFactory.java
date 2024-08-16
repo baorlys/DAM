@@ -14,6 +14,7 @@ public class TransformFactory {
     static {
         transformMap.put(ResourceType.IMAGE, new ImageTransform());
         transformMap.put(ResourceType.VIDEO, new VideoTransform());
+        transformMap.put(ResourceType.FILE, null);
     }
 
     public static ITransformable getTransform(ResourceType type) {

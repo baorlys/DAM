@@ -88,7 +88,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         }
 
         File file = new File(outputPath);
-        String contentType = type + "/" + getFileExtension(asset.getDisplayName());
+        String contentType = type + "/" + getFileExtension(asset.getFilePath());
         FileInputStream fileInputStream = new FileInputStream(file);
 
         return new MockMultipartFile(
