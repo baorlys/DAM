@@ -103,12 +103,12 @@ public class FolderServiceImpl implements FolderService {
 
 
     @Override
-    public List<FolderDTO> getAccessibleFolders(TenantUserInput input, String pageSize, String pageNum, String sortBy) {
+    public List<FolderDTO> getAccessibleFolders(UUID input, String pageSize, String pageNum, String sortBy) {
         int size = Integer.parseInt(pageSize);
         int page = Integer.parseInt(pageNum);
         Sort sort = (sortBy != null && !sortBy.isEmpty()) ? Sort.by(sortBy) : Sort.unsorted();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Folder> folders = folderRepository.findFoldersByTenantAndUser(input.getTenantId(), input.getUserId(), pageable);
+        Page<Folder> folders = folderRepository.findFoldersByTenant_Id(input, pageable);
         return folders.getContent().stream()
                 .map(folder -> modelMapper.map(folder, FolderDTO.class))
                 .toList();

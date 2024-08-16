@@ -21,20 +21,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FolderController {
     private final FolderService folderService;
-    @GetMapping
+    @GetMapping("{id}")
     public ResponseEntity<List<FolderDTO>> getSpaceFolders(@RequestParam(required = false, defaultValue = "0") String pageNum,
                                                            @RequestParam(required = false, defaultValue = "10") String pageSize,
                                                            @RequestParam(required = false) String sortBy,
-                                                           @RequestBody @NonNull TenantUserInput input
+                                                           @RequestBody @NonNull UUID id
     ) {
-        List<FolderDTO> dto = folderService.getAccessibleFolders(input, pageSize, pageNum, sortBy);
+        List<FolderDTO> dto = folderService.getAccessibleFolders(id, pageSize, pageNum, sortBy);
         return new ResponseEntity<>(dto, HttpStatus.OK);
-    }
-
-    @GetMapping("{id}")
-    public ResponseEntity getFolderByID(@PathVariable UUID id) {
-        Folder folder = folderService.getFolderById(id);
-        return new ResponseEntity<>(folder, HttpStatus.OK);
     }
 
     @PostMapping

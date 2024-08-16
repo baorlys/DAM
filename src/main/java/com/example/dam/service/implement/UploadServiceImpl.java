@@ -1,6 +1,7 @@
 package com.example.dam.service.implement;
 
 import com.example.dam.config.StorageProperties;
+import com.example.dam.global.service.FileService;
 import com.example.dam.input.AssetInput;
 import com.example.dam.model.*;
 import com.example.dam.repository.*;
@@ -35,23 +36,25 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public String upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey) throws IOException {
+        // build params
         Map<String, Object> attributes = buildUploadParams(assetInput.getMetadata());
+
+        //check tenant and credential
         Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
         CommonService.throwNotFound(tenant, "Can not find tenant");
         Credential credential = credentialRepository.findByApiKeyAndSecretKey(apiKey, secretKey);
         CommonService.throwNotFound(credential, "Can not find credential");
 
+        // save to storage
         String fName = (String) attributes.get("folder");
         Space space = getSpaceById(attributes.get("space_id"));
-
         Folder folder = findOrCreateFolder(tenant, credential.getUser(), space, fName);
-        String type = (String) attributes.get("type");
-
-        String path = buildPath(assetInput.getFile().getOriginalFilename(), tenant, space, folder, type);
-        saveFile(assetInput.getFile(),
-                buildPath(assetInput.getFile().getOriginalFilename(), tenant, space, folder, null),
+        String path = FileService.buildRelativePath(assetInput.getFile().getOriginalFilename());
+        FileService.saveFile(assetInput.getFile(),
+                FileService.buildAbsolutePath(path, tenant, space, folder),
                 storageProperties.getPath());
 
+        // save to database
         Asset asset = new Asset();
         asset.setId(UUID.randomUUID());
         asset.setTenant(tenant);
@@ -65,13 +68,7 @@ public class UploadServiceImpl implements UploadService {
         return asset.getFilePath();
     }
 
-    private String buildPath(String fileName, Tenant tenant, Space space, Folder folder, String type) {
-        return tenant.getId().toString() + '/' +
-                (CommonService.checkNull(type) ? type + '/' : "") +
-                (CommonService.checkNull(space) ? space.getId().toString() + '/' : "") +
-                (CommonService.checkNull(folder) ? folder.getName() + '/' : "") +
-                fileName;
-    }
+
 
     private Folder findOrCreateFolder(Tenant tenant, User user, Space space, String folderName) {
         if (folderName == null) {
@@ -81,14 +78,7 @@ public class UploadServiceImpl implements UploadService {
                 .orElseGet(() -> folderService.createFolder(user, folderName, tenant, space));
     }
 
-    public void saveFile(MultipartFile file, String fileName, String storageDirectory) throws IOException {
-        Path filePath = Paths.get(storageDirectory, fileName);
-        Path parentDir = filePath.getParent();
-        if (parentDir != null) {
-            Files.createDirectories(parentDir);
-        }
-        Files.copy(file.getInputStream(), filePath);
-    }
+
 
     private Map<String, Object> buildUploadParams(Map<String, String> options) {
         if (options == null) {
