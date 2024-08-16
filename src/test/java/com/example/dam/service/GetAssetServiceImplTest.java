@@ -2,6 +2,7 @@ package com.example.dam.service;
 
 
 import com.example.dam.dto.AssetDTO;
+import com.example.dam.exception.NotFoundException;
 import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
@@ -51,12 +52,12 @@ class GetAssetServiceImplTest {
     }
 
     @Test
-    void testGetAsset_success() throws CredentialException, IOException, InterruptedException {
+    void testGetAsset_success() throws CredentialException, IOException, InterruptedException, NotFoundException {
         // Setup
         String path = "cup-on-a-table.jpg";
         ConfigurationInput key = new ConfigurationInput("C1D4E15E-852C-4452-847D-0970CF36D1D4","apiKeyA", "secretKeyA");
         Map<String, String> options = new HashMap<>();
-        Asset asset = assetRepository.findByFilePath("src/main/resources/storage/cup-on-a-table.jpg");
+        Asset asset = assetRepository.findByFilePath("src/main/resources/storage/test-image.jpg");
 
 
         // Execute

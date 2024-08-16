@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConfigurationInput {
-    String spaceId;
+    String tenantId;
     String apiKey;
     String secretKey;
 }
