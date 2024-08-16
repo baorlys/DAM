@@ -10,8 +10,6 @@ import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.model.Tenant;
 import com.example.dam.repository.AssetRepository;
-import com.example.dam.repository.FolderRepository;
-import com.example.dam.repository.SpaceRepository;
 import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.AccessService;
 import com.example.dam.service.GetAssetService;
@@ -71,11 +69,12 @@ public class GetAssetServiceImpl implements GetAssetService {
     public MultipartFile getAssetFile(String tenantId, String type, String path, Map<String, String> options)
             throws IOException, NotFoundException, InterruptedException {
         Tenant tenant = getTenant(tenantId);
-        String buildPath = buildFilePath(tenant, path);
 
         Asset asset = assetRepository.findByFilePath(path);
         Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
 
+
+        String buildPath = buildFilePath(tenant, path);
         String outputPath = storageProperties.getPath() + buildPath;
 
         if (!options.isEmpty()) {
