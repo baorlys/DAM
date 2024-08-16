@@ -49,7 +49,7 @@ public class UploadServiceImpl implements UploadService {
         String fName = (String) attributes.get("folder");
         Space space = getSpaceById(attributes.get("space_id"));
         Folder folder = findOrCreateFolder(tenant, credential.getUser(), space, fName);
-        String path = FileService.buildRelativePath(assetInput.getFile().getOriginalFilename(), space, folder);
+        String path = FileService.buildRelativePath(assetInput.getFile().getOriginalFilename());
         FileService.saveFile(assetInput.getFile(),
                 FileService.buildAbsolutePath(assetInput.getFile().getOriginalFilename(), tenant, space, folder),
                 storageProperties.getPath());

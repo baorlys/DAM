@@ -9,13 +9,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 public class FileService {
-    public static String buildRelativePath(String fileName, Space space, Folder folder) {
-        return '/' +
-                (CommonService.checkNull(space) ? space.getId().toString() + '/' : "") +
-                (CommonService.checkNull(folder) ? folder.getName() + '/' : "") +
-                fileName;
+    public static String buildRelativePath(String fileName) {
+        int dotIndex = fileName.lastIndexOf('.');
+        String name = fileName.substring(0, dotIndex);
+        String extension = fileName.substring(dotIndex);
+        String randomString = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+        return name + randomString + extension;
+
     }
 
     public static String buildAbsolutePath(String fileName, Tenant tenant, Space space, Folder folder) {
@@ -24,6 +27,7 @@ public class FileService {
                 (CommonService.checkNull(folder) ? folder.getName() + '/' : "") +
                 fileName;
     }
+
     public static void saveFile(MultipartFile file, String fileName, String storageDirectory) throws IOException {
         Path filePath = Paths.get(storageDirectory, fileName);
         Path parentDir = filePath.getParent();
