@@ -79,8 +79,8 @@ public class GetAssetServiceImpl implements GetAssetService {
         String outputPath = storageProperties.getPath() + buildPath;
 
         if (!options.isEmpty()) {
-            ResourceType resourceType = ResourceType.valueOf(metadata.get(" resource_type").toUpperCase());
-            outputPath = storageProperties.getTransformPath() + buildPath;
+            ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
+            outputPath = storageProperties.getTransformPath() + path;
             handleAssetService.transform(resourceType, storageProperties.getPath() + buildPath, outputPath,
                     convertToTransformVariable(options));
 
@@ -107,9 +107,9 @@ public class GetAssetServiceImpl implements GetAssetService {
     @Override
     public String getFilePath(String tenantId, String path) throws NotFoundException {
         Tenant tenant = getTenant(tenantId);
-        String buildPath = buildFilePath(tenant, path);
-        Asset asset = assetRepository.findByFilePath(buildPath);
-        return storageProperties.getPath() + asset.getFilePath();
+        Asset asset = assetRepository.findByFilePath(path);
+        String buildPath = buildFilePath(tenant, asset.getFilePath());
+        return storageProperties.getPath() + buildPath;
     }
 
     private String buildFilePath(Tenant tenant, String path) {

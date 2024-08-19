@@ -40,18 +40,65 @@ public class UploadServiceImpl implements UploadService {
     private HandleAssetService handleAssetService;
     private DamMapper damMapper;
 
+//    @Override
+//    public AssetDTO upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey) throws IOException, CredentialException, InterruptedException {
+//        // build params
+//        Map<String, Object> attributes = buildUploadParams(assetInput.getMetadata());
+//        MultipartFile file = assetInput.getFile();
+//
+//        // check tenant and credential
+//        Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
+//        CommonService.throwNotFound(tenant, "Can not find tenant");
+//        Credential credential = credentialRepository.findByApiKeyAndSecretKey(apiKey, secretKey);
+//
+//        // handle folder & file name
+//        String fName = (String) attributes.get("folder");
+//        Space space = getSpaceById(attributes.get("space_id"));
+//        String originName = file.getOriginalFilename();
+//        Folder folder = findOrCreateFolder(tenant, credential.getUser(), space, fName);
+//        String path = FileService.buildRelativePath(Objects.requireNonNull(originName));
+////        accessService.isAccessible(apiKey, secretKey, path);
+//
+//        // save asset and thumbnail
+//        String absolutePath = FileService.buildAbsolutePath(path, tenant, space, folder);
+//        FileService.saveFile(file, absolutePath, storageProperties.getPath());
+//        String thumbnail = storageProperties.getThumbnailPath() + path;
+//        handleAssetService.generateThumbnail(
+//                (ResourceType) attributes.get("resource_type"),
+//                storageProperties.getPath() + absolutePath, thumbnail, 300);
+//
+//        // handle file information
+//        attributes.put("size", file.getSize());
+//        attributes.put("origin_name", originName);
+//        attributes.put("extension", FileService.extractExtension(originName));
+//
+//        // save to database
+//        Asset asset = new Asset();
+//        asset.setId(UUID.randomUUID());
+//        asset.setTenant(tenant);
+//        asset.setSpace(space);
+//        asset.setFolder(folder);
+//        asset.setMetadata(objectMapper.writeValueAsString(attributes));
+//        asset.setPublicId(UUID.randomUUID().toString());
+//        asset.setFilePath(path);
+//        asset.setDisplayName(file.getOriginalFilename());
+//        asset.setThumbnailPath(thumbnail);
+//        return damMapper.mapAsset(assetRepository.save(asset));
+//    }
+
+
     @Override
-    public AssetDTO upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey) throws IOException, CredentialException, InterruptedException {
+    public String upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey) throws IOException, CredentialException, InterruptedException {
         // build params
         Map<String, Object> attributes = buildUploadParams(assetInput.getMetadata());
         MultipartFile file = assetInput.getFile();
 
-        //check tenant and credential
+        // check tenant and credential
         Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
         CommonService.throwNotFound(tenant, "Can not find tenant");
         Credential credential = credentialRepository.findByApiKeyAndSecretKey(apiKey, secretKey);
 
-        // check credential
+        // handle folder & file name
         String fName = (String) attributes.get("folder");
         Space space = getSpaceById(attributes.get("space_id"));
         String originName = file.getOriginalFilename();
@@ -63,7 +110,9 @@ public class UploadServiceImpl implements UploadService {
         String absolutePath = FileService.buildAbsolutePath(path, tenant, space, folder);
         FileService.saveFile(file, absolutePath, storageProperties.getPath());
         String thumbnail = storageProperties.getThumbnailPath() + path;
-        handleAssetService.generateThumbnail((ResourceType) attributes.get("resource_type"), storageProperties.getPath() + absolutePath, thumbnail, 300);
+        handleAssetService.generateThumbnail(
+                (ResourceType) attributes.get("resource_type"),
+                storageProperties.getPath() + absolutePath, thumbnail, 300);
 
         // handle file information
         attributes.put("size", file.getSize());
@@ -81,7 +130,8 @@ public class UploadServiceImpl implements UploadService {
         asset.setFilePath(path);
         asset.setDisplayName(file.getOriginalFilename());
         asset.setThumbnailPath(thumbnail);
-        return damMapper.mapAsset(assetRepository.save(asset));
+        assetRepository.save(asset);
+        return asset.getFilePath();
     }
 
 
