@@ -53,7 +53,8 @@ public class GetAssetServiceImpl implements GetAssetService {
         checkAccess(key.getApiKey(), key.getSecretKey(), path);
 
         Asset asset = assetRepository.findByFilePath(path);
-        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
+        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {
+        });
 
         if (options.isEmpty()) {
             return mapper.map(asset, AssetDTO.class);
@@ -75,9 +76,10 @@ public class GetAssetServiceImpl implements GetAssetService {
         String buildPath = buildFilePath(tenant, path);
 
         Asset asset = assetRepository.findByFilePath(path);
-        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
+        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {
+        });
 
-        String outputPath = storageProperties.getPath() + buildPath;
+        String outputPath = storageProperties.getTransformPath() + buildPath;
 
         if (!options.isEmpty()) {
             ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
@@ -110,7 +112,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         Tenant tenant = getTenant(tenantId);
         Asset asset = assetRepository.findByFilePath(path);
         String buildPath = buildFilePath(tenant, asset.getFilePath());
-        return storageProperties.getPath() + buildPath;
+        return storageProperties.getTransformPath() + buildPath;
     }
 
     private String buildFilePath(Tenant tenant, String path) {
@@ -130,9 +132,6 @@ public class GetAssetServiceImpl implements GetAssetService {
         int lastDotIndex = fileName.lastIndexOf('.');
         return (lastDotIndex == -1) ? "octet-stream" : fileName.substring(lastDotIndex + 1).toLowerCase();
     }
-
-
-
 
 
 }
