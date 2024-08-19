@@ -10,8 +10,6 @@ import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.model.Tenant;
 import com.example.dam.repository.AssetRepository;
-import com.example.dam.repository.FolderRepository;
-import com.example.dam.repository.SpaceRepository;
 import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.AccessService;
 import com.example.dam.service.GetAssetService;
@@ -79,7 +77,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         String outputPath = storageProperties.getPath() + buildPath;
 
         if (!options.isEmpty()) {
-            ResourceType resourceType = ResourceType.valueOf(metadata.get(" resource_type").toUpperCase());
+            ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
             outputPath = storageProperties.getTransformPath() + buildPath;
             handleAssetService.transform(resourceType, storageProperties.getPath() + buildPath, outputPath,
                     convertToTransformVariable(options));
