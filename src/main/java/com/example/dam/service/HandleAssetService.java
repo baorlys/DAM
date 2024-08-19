@@ -12,4 +12,6 @@ public interface HandleAssetService {
 
     void generateThumbnail(ResourceType type, String filePath, String outputPath, int scaleTarget)
             throws IOException, InterruptedException;
+
+    Map<TransformVariable, String> convertToTransformVariable(Map<String, String> options);
 }

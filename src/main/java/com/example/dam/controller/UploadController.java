@@ -20,25 +20,14 @@ import java.util.UUID;
 public class UploadController {
     private final UploadService uploadService;
 
-//    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<AssetDTO> upload(@ModelAttribute AssetInput assetInput,
-//                                 @RequestHeader("X-API-Key") @NonNull String apiKey,
-//                                 @RequestHeader("X-Secret-Key") @NonNull String secretKey,
-//                                 @RequestHeader("X-Tenant-ID") @NonNull String tenantId
-//    ) throws IOException, CredentialException, InterruptedException {
-//        UUID tenant = UUID.fromString(tenantId);
-//        AssetDTO dto = uploadService.upload(assetInput, tenant, apiKey, secretKey);
-//        return new ResponseEntity<>(dto, HttpStatus.OK);
-//    }
-
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> upload(@ModelAttribute AssetInput assetInput,
+    public ResponseEntity<AssetDTO> upload(@ModelAttribute AssetInput assetInput,
                                            @RequestHeader("X-API-Key") @NonNull String apiKey,
                                            @RequestHeader("X-Secret-Key") @NonNull String secretKey,
                                            @RequestHeader("X-Tenant-ID") @NonNull String tenantId
     ) throws IOException, CredentialException, InterruptedException {
         UUID tenant = UUID.fromString(tenantId);
-        String dto = uploadService.upload(assetInput, tenant, apiKey, secretKey);
+        AssetDTO dto = uploadService.upload(assetInput, tenant, apiKey, secretKey);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 }

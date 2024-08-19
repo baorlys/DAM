@@ -61,7 +61,8 @@ public class GetAssetServiceImpl implements GetAssetService {
 
         ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
         String outputPath = storageProperties.getTransformPath() + buildPath;
-        handleAssetService.transform(resourceType, buildPath, outputPath, convertToTransformVariable(options));
+        handleAssetService.transform(resourceType, buildPath, outputPath,
+                handleAssetService.convertToTransformVariable(options));
 
         asset.setFilePath(outputPath);
         return mapper.map(asset, AssetDTO.class);
@@ -82,7 +83,7 @@ public class GetAssetServiceImpl implements GetAssetService {
             ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
             outputPath = storageProperties.getTransformPath() + path;
             handleAssetService.transform(resourceType, storageProperties.getPath() + buildPath, outputPath,
-                    convertToTransformVariable(options));
+                    handleAssetService.convertToTransformVariable(options));
 
             asset.setFilePath(outputPath);
         }
@@ -130,13 +131,7 @@ public class GetAssetServiceImpl implements GetAssetService {
         return (lastDotIndex == -1) ? "octet-stream" : fileName.substring(lastDotIndex + 1).toLowerCase();
     }
 
-    private Map<TransformVariable, String> convertToTransformVariable(Map<String, String> options) {
-        Map<TransformVariable, String> transformVariables = new EnumMap<>(TransformVariable.class);
-        for (Map.Entry<String, String> entry : options.entrySet()) {
-            transformVariables.put(TransformVariable.fromShortCut(entry.getKey()), entry.getValue());
-        }
-        return transformVariables;
-    }
+
 
 
 
