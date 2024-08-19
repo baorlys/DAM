@@ -17,6 +17,7 @@ public class AssetDTO {
     ResourceType type;
     ExtensionFile extensionFile;
     long size;
+    String originPath;
     String filePath;
     String thumbnailUrl;
     String originalFilename;
