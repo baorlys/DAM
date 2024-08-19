@@ -81,7 +81,7 @@ public class UploadServiceImpl implements UploadService {
         asset.setFilePath(path);
         asset.setDisplayName(file.getOriginalFilename());
         asset.setThumbnailPath(thumbnail);
-        return damMapper.map(assetRepository.save(asset), AssetDTO.class);
+        return damMapper.mapAsset(assetRepository.save(asset));
     }
 
     private String handleMetadata(Map<String, Object> data, MultipartFile file) throws JsonProcessingException {
