@@ -69,7 +69,6 @@ public class UploadServiceImpl implements UploadService {
 
         String thumbnail = storageProperties.getThumbnailPath() + absolutePath;
         handleAssetService.generateThumbnail(srcType, storageProperties.getPath() + absolutePath, thumbnail, 300);
-
         // save to database
         Asset asset = new Asset();
         asset.setId(UUID.randomUUID());

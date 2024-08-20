@@ -6,6 +6,7 @@ import com.example.dam.model.Credential;
 import com.example.dam.model.Role;
 import com.example.dam.model.User;
 import com.example.dam.repository.CredentialRepository;
+import com.example.dam.repository.UserFolderRepository;
 import com.example.dam.repository.UserRepository;
 import com.example.dam.repository.UserSpaceRepository;
 import com.example.dam.service.UserService;
@@ -15,7 +16,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Service
 @AllArgsConstructor
@@ -25,6 +28,8 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     UserSpaceRepository userSpaceRepository;
+
+    UserFolderRepository userFolderRepository;
 
 
 
@@ -69,12 +74,13 @@ public class UserServiceImpl implements UserService {
     public void updateCredential(UUID credentialId, Credential credential) {
 
     }
-//
-//    public Role getRoleUserIn(UUID userId, TargetLevel level, UUID targetId) {
-//        Map<TargetLevel, Supplier<Role>> roleMap = Map.of(
-//                TargetLevel.TENANT, () -> userRepository.getRoleInTenant(userId, targetId),
-//                TargetLevel.SPACE, () -> userSpaceRepository.getRoleInSpace(userId, targetId),
-//                TargetLevel.FOLDER, () -> userRepository.getRoleInFolder(userId, targetId)
-//        );
-//    }
+
+    public Role getRoleUserIn(UUID userId, TargetLevel level, UUID targetId) {
+        Map<TargetLevel, Supplier<Role>> roleMap = Map.of(
+                TargetLevel.TENANT, () -> userRepository.getRoleInTenant(userId, targetId),
+                TargetLevel.SPACE, () -> userSpaceRepository.getRoleInSpace(userId, targetId),
+                TargetLevel.FOLDER, () -> userFolderRepository.getRoleInFolder(userId, targetId)
+        );
+        return roleMap.get(level).get();
+    }
 }

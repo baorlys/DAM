@@ -15,6 +15,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder(toBuilder = true)
 public class Asset {
     @ManyToOne
     @JoinColumn(nullable = false)
