@@ -12,6 +12,9 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 public class FileService {
+    private FileService() {
+        // Empty constructor
+    }
 
     public static String extractExtension(String fileName) {
         int dotIndex = fileName.lastIndexOf('.');

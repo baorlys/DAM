@@ -47,13 +47,29 @@ public class GetAssetController {
         return ResponseEntity.ok(getAssetService.getAsset(key, path, options));
     }
 
+    @GetMapping("/{tenantId}/thumbnail/{path}")
+    public ResponseEntity<InputStreamResource> getThumbnailFile(@PathVariable String tenantId,
+                                                                @PathVariable String path,
+                                                                @RequestParam @Nullable Map<String, String> options)
+            throws CredentialException, IOException, InterruptedException, NotFoundException {
+
+        return getFile(tenantId, "thumbnail", path, options);
+    }
+
     @GetMapping("/{tenantId}/image/{path}")
     public ResponseEntity<InputStreamResource> getImageFile(@PathVariable String tenantId,
                                                             @PathVariable String path,
                                                             @RequestParam @Nullable Map<String, String> options)
             throws CredentialException, IOException, InterruptedException, NotFoundException {
 
-        MultipartFile multipartFile = getAssetService.getAssetFile(tenantId, "image", path, options);
+        return getFile(tenantId, "image", path, options);
+    }
+
+    private ResponseEntity<InputStreamResource> getFile(String tenantId, String type, String path,
+                                                        @Nullable Map<String, String> options)
+            throws CredentialException, IOException, InterruptedException, NotFoundException {
+
+        MultipartFile multipartFile = getAssetService.getAssetFile(tenantId, type, path, options);
 
         InputStream inputStream = multipartFile.getInputStream();
         String contentType = multipartFile.getContentType();
@@ -64,7 +80,6 @@ public class GetAssetController {
 
         return new ResponseEntity<>(new InputStreamResource(inputStream), headers, HttpStatus.OK);
     }
-
 
 
     @GetMapping("/{tenantId}/video/{path}")

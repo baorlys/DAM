@@ -3,7 +3,7 @@ package com.example.dam.global.service;
 import com.example.dam.enums.ExtensionFile;
 import com.example.dam.enums.ResourceType;
 import com.example.dam.exception.ExistsRecord;
-import com.example.dam.global.random.RandomId;
+import com.example.dam.global.utils.RandomId;
 import org.webjars.NotFoundException;
 
 import javax.security.auth.login.CredentialException;

@@ -1,5 +1,4 @@
-package com.example.dam.global.random;
-
+package com.example.dam.global.utils;
 
 import java.util.UUID;
 
@@ -13,4 +12,12 @@ public class RandomId {
         UUID uuid = UUID.randomUUID();
         return uuid.toString().replace("-","").substring(0, ID_LENGTH);
     }
+
+    public static String generateRandomId(int length) {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString().replace("-","").substring(0, length);
+    }
+
+
+
 }
