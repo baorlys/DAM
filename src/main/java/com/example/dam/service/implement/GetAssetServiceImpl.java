@@ -10,6 +10,8 @@ import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.model.Tenant;
 import com.example.dam.repository.AssetRepository;
+import com.example.dam.repository.FolderRepository;
+import com.example.dam.repository.SpaceRepository;
 import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.AccessService;
 import com.example.dam.service.GetAssetService;
@@ -51,7 +53,8 @@ public class GetAssetServiceImpl implements GetAssetService {
         checkAccess(key.getApiKey(), key.getSecretKey(), path);
 
         Asset asset = assetRepository.findByFilePath(path);
-        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
+        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {
+        });
 
         if (options.isEmpty()) {
             return mapper.map(asset, AssetDTO.class);
@@ -59,7 +62,8 @@ public class GetAssetServiceImpl implements GetAssetService {
 
         ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
         String outputPath = storageProperties.getTransformPath() + buildPath;
-        handleAssetService.transform(resourceType, buildPath, outputPath, convertToTransformVariable(options));
+        handleAssetService.transform(resourceType, buildPath, outputPath,
+                handleAssetService.convertToTransformVariable(options));
 
         asset.setFilePath(outputPath);
         return mapper.map(asset, AssetDTO.class);
@@ -72,15 +76,16 @@ public class GetAssetServiceImpl implements GetAssetService {
         String buildPath = buildFilePath(tenant, path);
 
         Asset asset = assetRepository.findByFilePath(path);
-        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
+        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {
+        });
 
-        String outputPath = storageProperties.getPath() + buildPath;
+        String outputPath = storageProperties.getTransformPath() + buildPath;
 
         if (!options.isEmpty()) {
             ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
-            outputPath = storageProperties.getTransformPath() + buildPath;
+            outputPath = storageProperties.getTransformPath() + path;
             handleAssetService.transform(resourceType, storageProperties.getPath() + buildPath, outputPath,
-                    convertToTransformVariable(options));
+                    handleAssetService.convertToTransformVariable(options));
 
             asset.setFilePath(outputPath);
         }
@@ -105,9 +110,9 @@ public class GetAssetServiceImpl implements GetAssetService {
     @Override
     public String getFilePath(String tenantId, String path) throws NotFoundException {
         Tenant tenant = getTenant(tenantId);
-        String buildPath = buildFilePath(tenant, path);
-        Asset asset = assetRepository.findByFilePath(buildPath);
-        return storageProperties.getPath() + asset.getFilePath();
+        Asset asset = assetRepository.findByFilePath(path);
+        String buildPath = buildFilePath(tenant, asset.getFilePath());
+        return storageProperties.getTransformPath() + buildPath;
     }
 
     private String buildFilePath(Tenant tenant, String path) {
@@ -127,15 +132,6 @@ public class GetAssetServiceImpl implements GetAssetService {
         int lastDotIndex = fileName.lastIndexOf('.');
         return (lastDotIndex == -1) ? "octet-stream" : fileName.substring(lastDotIndex + 1).toLowerCase();
     }
-
-    private Map<TransformVariable, String> convertToTransformVariable(Map<String, String> options) {
-        Map<TransformVariable, String> transformVariables = new EnumMap<>(TransformVariable.class);
-        for (Map.Entry<String, String> entry : options.entrySet()) {
-            transformVariables.put(TransformVariable.fromShortCut(entry.getKey()), entry.getValue());
-        }
-        return transformVariables;
-    }
-
 
 
 }

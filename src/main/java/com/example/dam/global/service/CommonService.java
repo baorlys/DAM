@@ -1,10 +1,13 @@
 package com.example.dam.global.service;
 
+import com.example.dam.enums.ExtensionFile;
+import com.example.dam.enums.ResourceType;
 import com.example.dam.exception.ExistsRecord;
 import com.example.dam.global.utils.RandomId;
 import org.webjars.NotFoundException;
 
 import javax.security.auth.login.CredentialException;
+import java.util.Arrays;
 
 public class CommonService {
     private CommonService() {
@@ -37,6 +40,17 @@ public class CommonService {
         }
     }
 
+    public static ResourceType findResourceType(String type) {
+        return Arrays.stream(ResourceType.values())
+                .filter(t -> t.toString().equals(type.toUpperCase())).findFirst()
+                .orElse(null);
+    }
+
+    public static ExtensionFile findExtensionFile(String type) {
+        return Arrays.stream(ExtensionFile.values())
+                .filter(t -> t.toString().equals(type.toUpperCase())).findFirst()
+                .orElse(null);
+    }
     public static boolean checkNull(Object o) {
         return o != null;
     }

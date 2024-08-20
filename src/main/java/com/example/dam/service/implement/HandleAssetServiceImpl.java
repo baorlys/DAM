@@ -10,6 +10,7 @@ import com.example.dam.service.transform.TransformFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.Map;
 
 @Service
@@ -26,5 +27,14 @@ public class HandleAssetServiceImpl implements HandleAssetService {
             throws IOException, InterruptedException {
         IGenerateThumbnail thumbnailGenerator = ThumbnailFactory.getGenerate(type);
         thumbnailGenerator.generateThumbnail(filePath, outputPath, scaleTarget);
+    }
+
+    @Override
+    public Map<TransformVariable, String> convertToTransformVariable(Map<String, String> options) {
+        Map<TransformVariable, String> transformVariables = new EnumMap<>(TransformVariable.class);
+        for (Map.Entry<String, String> entry : options.entrySet()) {
+            transformVariables.put(TransformVariable.fromShortCut(entry.getKey()), entry.getValue());
+        }
+        return transformVariables;
     }
 }
