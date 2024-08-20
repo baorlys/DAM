@@ -38,60 +38,98 @@ public class UploadServiceImpl implements UploadService {
     private ObjectMapper objectMapper;
     private HandleAssetService handleAssetService;
     private DamMapper damMapper;
+    private static final String FOLDER = "folder";
+    private static final String SPACE_ID = "space_id";
+    private static final String TYPE = "type";
+    private static final String RESOURCE_TYPE = "resource_type";
+    private static final String TRANSFORM = "transformation";
+    private static final String PUBLIC_ID = "public_id";
+    private static final String DISPLAY_NAME = "display_name";
+    private static final String NOTIFICATION_URL = "notification_url";
 
     @Override
-    public AssetDTO upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey) throws IOException, CredentialException, InterruptedException {
-        // build params
+    public AssetDTO upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey)
+            throws IOException, CredentialException, InterruptedException {
+        // Build params
         Map<String, Object> attributes = buildUploadParams(assetInput.getMetadata());
-        MultipartFile file = assetInput.getFile();
+        MultipartFile file = Objects.requireNonNull(assetInput.getFile());
 
-        // check tenant and credential
-        Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
-        CommonService.throwNotFound(tenant, "Can not find tenant");
-        Credential credential = credentialRepository.findByApiKeyAndSecretKey(apiKey, secretKey);
+        // Validate tenant and credential
+        Tenant tenant = validateTenant(tenantId);
+        Credential credential = validateCredential(apiKey, secretKey);
 
-        // handle folder & file name
-        String fName = (String) attributes.get("folder");
-        Space space = getSpaceById(attributes.get("space_id"));
+        // Handle folder & file name
+        String fName = (String) attributes.get(FOLDER);
+        Space space = getSpaceById(attributes.get(SPACE_ID));
         String originName = file.getOriginalFilename();
         Folder folder = findOrCreateFolder(tenant, credential.getUser(), space, fName);
         String path = FileService.buildRelativePath(Objects.requireNonNull(originName));
 
-        // save origin, auto-scale and thumbnail
+        // Save origin, auto-scale, and thumbnail
         String absolutePath = FileService.buildAbsolutePath(path, tenant, space, folder);
-        FileService.saveFile(file, absolutePath, storageProperties.getPath());
-
-        ResourceType srcType = (ResourceType) attributes.get("resource_type");
-        String transformPath = storageProperties.getTransformPath() + absolutePath;
-        Map<String, String> transform = (Map<String, String>) attributes.get("transform");
-        handleAssetService.transform(srcType, storageProperties.getPath() + absolutePath, transformPath,
-                handleAssetService.convertToTransformVariable(transform));
-
         String thumbnail = storageProperties.getThumbnailPath() + absolutePath;
-        handleAssetService.generateThumbnail(srcType, storageProperties.getPath() + absolutePath, thumbnail, 300);
+        saveAndProcessFile(file, absolutePath, attributes, thumbnail);
 
-        // save to database
-        Asset asset = new Asset();
-        asset.setId(UUID.randomUUID());
-        asset.setTenant(tenant);
-        asset.setSpace(space);
-        asset.setFolder(folder);
-        asset.setMetadata(handleMetadata(attributes, file));
-        asset.setPublicId(UUID.randomUUID().toString());
-        asset.setFilePath(path);
-        asset.setDisplayName(file.getOriginalFilename());
-        asset.setThumbnailPath(thumbnail);
+        // Save to database
+        Asset asset = Asset.builder()
+                .id(UUID.randomUUID())
+                .displayName(file.getOriginalFilename())
+                .tenant(tenant)
+                .space(space)
+                .folder(folder)
+                .metadata(handleMetadata(attributes, file))
+                .publicId(UUID.randomUUID().toString())
+                .filePath(path)
+                .thumbnailPath(thumbnail)
+                .build();
         return damMapper.mapAsset(assetRepository.save(asset));
     }
+
+    private Tenant validateTenant(UUID tenantId) throws CredentialException {
+        return tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new CredentialException("Tenant not found"));
+    }
+
+    private Credential validateCredential(String apiKey, String secretKey) {
+        return credentialRepository.findByApiKeyAndSecretKey(apiKey, secretKey);
+    }
+
+    private void saveAndProcessFile(MultipartFile file, String absolutePath, Map<String, Object> attributes, String thumbnail)
+            throws IOException, InterruptedException {
+        FileService.saveFile(file, absolutePath, storageProperties.getPath());
+        ResourceType resourceType = (ResourceType) attributes.get(RESOURCE_TYPE);
+        String transformPath = storageProperties.getTransformPath() + absolutePath;
+        Map<String, String> transform = (Map<String, String>) attributes.get(TRANSFORM);
+        handleAssetService.transform(resourceType, storageProperties.getPath() + absolutePath, transformPath,
+                handleAssetService.convertToTransformVariable(transform));
+        handleAssetService.generateThumbnail(resourceType, storageProperties.getPath() + absolutePath, thumbnail, 300);
+    }
+
 
     private String handleMetadata(Map<String, Object> data, MultipartFile file) throws JsonProcessingException {
         data.put("size", file.getSize());
         data.put("origin_name", file.getOriginalFilename());
         data.put("extension", FileService.extractExtension(Objects.requireNonNull(file.getOriginalFilename())));
-        data.remove("space_id");
-        data.remove("folder");
-        data.remove("transform");
+        data.remove(SPACE_ID);
+        data.remove(FOLDER);
+        data.remove(TRANSFORM);
         return objectMapper.writeValueAsString(data);
+    }
+
+    private Map<String, Object> buildUploadParams(Map<String, String> options) throws JsonProcessingException {
+        if (options == null) {
+            options = Collections.emptyMap();
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put(PUBLIC_ID, options.get(PUBLIC_ID));
+        params.put(SPACE_ID, options.get(SPACE_ID));
+        params.put(FOLDER, options.get(FOLDER));
+        params.put(TYPE, options.get(TYPE));
+        params.put(RESOURCE_TYPE, CommonService.findResourceType(options.get(RESOURCE_TYPE)));
+        params.put(DISPLAY_NAME, options.get(DISPLAY_NAME));
+        params.put(NOTIFICATION_URL, options.get(NOTIFICATION_URL));
+        params.put(TRANSFORM, objectMapper.readValue(options.get(TRANSFORM), Map.class));
+        return params;
     }
 
 
@@ -103,22 +141,6 @@ public class UploadServiceImpl implements UploadService {
                 .orElseGet(() -> folderService.createFolder(user, folderName, tenant, space));
     }
 
-
-    private Map<String, Object> buildUploadParams(Map<String, String> options) throws JsonProcessingException {
-        if (options == null) {
-            options = Collections.emptyMap();
-        }
-        Map<String, Object> params = new HashMap<>();
-        params.put("public_id", options.get("public_id"));
-        params.put("space_id", options.get("space"));
-        params.put("folder", options.get("folder_name"));
-        params.put("type", options.get("type"));
-        params.put("resource_type", CommonService.findResourceType(options.get("resource_type")));
-        params.put("display_name", options.get("display_name"));
-        params.put("notification_url", options.get("notification_url"));
-        params.put("transform", objectMapper.readValue(options.get("transformation"), Map.class));
-        return params;
-    }
 
     private Space getSpaceById(Object spaceId) {
         return Optional.ofNullable(spaceId)

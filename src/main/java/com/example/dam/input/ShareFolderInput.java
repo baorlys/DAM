@@ -1,6 +1,5 @@
 package com.example.dam.input;
 
-import com.example.dam.model.UserFolder;
 import lombok.Data;
 
 import java.util.UUID;
@@ -9,5 +8,4 @@ import java.util.UUID;
 public class ShareFolderInput {
     String email;
     UUID roleId;
-    UUID tenantId;
 }

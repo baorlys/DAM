@@ -2,7 +2,6 @@ package com.example.dam.service.implement;
 
 import com.example.dam.config.StorageProperties;
 import com.example.dam.dto.FolderDTO;
-import com.example.dam.input.TenantUserInput;
 import com.example.dam.model.*;
 import com.example.dam.repository.*;
 import com.example.dam.global.service.CommonService;
@@ -10,7 +9,6 @@ import com.example.dam.service.FolderService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +37,7 @@ public class FolderServiceImpl implements FolderService {
     private final ModelMapper modelMapper;
 
     @Override
-    public Folder createFolder(UUID userId, String fName, UUID tenantId, UUID spaceId, UUID parentId) throws IOException {
+    public FolderDTO createFolder(UUID userId, String fName, UUID tenantId, UUID spaceId, UUID parentId) throws IOException {
         Path folderPath = Paths.get(storageProperties.getPath(), fName);
         if (!Files.exists(folderPath)) {
             Files.createDirectories(folderPath);
@@ -51,7 +49,8 @@ public class FolderServiceImpl implements FolderService {
                 .map(this::getFolderById)
                 .orElse(null);
         CommonService.checkNonNull(user, tenant);
-        return createAndSaveFolder(fName, tenant, space, parent, user);
+        Folder folder = createAndSaveFolder(fName, tenant, space, parent, user);
+        return modelMapper.map(folder, FolderDTO.class);
     }
 
     @Override
@@ -73,14 +72,14 @@ public class FolderServiceImpl implements FolderService {
 
 
     @Override
-    public Folder shareFolder(String email, UUID folderId, UUID roleId, UUID tenantId) {
+    public FolderDTO shareFolder(String email, UUID folderId, UUID roleId, UUID tenantId) {
         User user = userRepository.findUserByEmail(email);
         Tenant tenant = tenantRepository.findById(tenantId).orElse(null);
         Folder folder = getFolderById(folderId);
         Role role = roleRepository.findById(roleId).orElse(null);
         CommonService.checkNonNull(user, folder);
         createFolderAccess(tenant, user, folder, role);
-        return folder;
+        return modelMapper.map(folder, FolderDTO.class);
     }
 
     public void createFolderAccess(Tenant tenant, User user, Folder folder, Role role) {

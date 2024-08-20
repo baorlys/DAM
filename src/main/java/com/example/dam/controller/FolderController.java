@@ -3,7 +3,6 @@ package com.example.dam.controller;
 import com.example.dam.dto.FolderDTO;
 import com.example.dam.input.FolderInput;
 import com.example.dam.input.ShareFolderInput;
-import com.example.dam.input.TenantUserInput;
 import com.example.dam.model.Folder;
 import com.example.dam.service.FolderService;
 import lombok.AllArgsConstructor;
@@ -32,16 +31,21 @@ public class FolderController {
     }
 
     @PostMapping
-    public ResponseEntity createFolder(@RequestBody FolderInput input) throws IOException {
-        Folder folder = folderService.createFolder(
-                input.getUserId(), input.getFolderName(), input.getTenantId(), input.getSpaceId(), input.getParentId());
-        return new ResponseEntity<>(folder, HttpStatus.OK);
+    public ResponseEntity<FolderDTO> createFolder(
+            @RequestHeader UUID tenantId,
+            @RequestHeader UUID spaceId,
+            @RequestHeader UUID userId,
+            @RequestBody FolderInput input) throws IOException {
+        FolderDTO dto = folderService.createFolder(userId, input.getFolderName(), tenantId, spaceId, input.getParentId());
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @PostMapping("{id}")
-    public ResponseEntity shareFolder(@PathVariable UUID id, @RequestBody ShareFolderInput input) {
-        Folder folder = folderService.shareFolder(input.getEmail(), id, input.getRoleId(), input.getTenantId());
-        return new ResponseEntity<>(folder, HttpStatus.OK);
+    public ResponseEntity shareFolder(@PathVariable UUID id,
+                                      @RequestHeader UUID tenantId,
+                                      @RequestBody ShareFolderInput input) {
+        FolderDTO dto = folderService.shareFolder(input.getEmail(), id, input.getRoleId(), tenantId);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
