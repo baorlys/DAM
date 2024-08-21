@@ -100,8 +100,12 @@ public class UploadServiceImpl implements UploadService {
         ResourceType resourceType = (ResourceType) attributes.get(RESOURCE_TYPE);
         String transformPath = storageProperties.getTransformPath() + absolutePath;
         Map<String, String> transform = (Map<String, String>) attributes.get(TRANSFORM);
-        handleAssetService.transform(resourceType, storageProperties.getPath() + absolutePath, transformPath,
-                handleAssetService.convertToTransformVariable(transform));
+        if (file.getSize() > 5000) {
+            handleAssetService.transform(resourceType, storageProperties.getPath() + absolutePath, transformPath,
+                    handleAssetService.convertToTransformVariable(transform));
+        } else {
+            FileService.saveFile(file, "", transformPath);
+        }
         handleAssetService.generateThumbnail(resourceType, storageProperties.getPath() + absolutePath, thumbnail, 300);
     }
 
