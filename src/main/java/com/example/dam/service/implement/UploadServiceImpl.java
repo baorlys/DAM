@@ -46,7 +46,7 @@ public class UploadServiceImpl implements UploadService {
     private static final String PUBLIC_ID = "public_id";
     private static final String DISPLAY_NAME = "display_name";
     private static final String NOTIFICATION_URL = "notification_url";
-
+    private static final int THRESH_HOLD = 5000;
     @Override
     public AssetDTO upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey)
             throws IOException, CredentialException, InterruptedException {
@@ -100,7 +100,7 @@ public class UploadServiceImpl implements UploadService {
         ResourceType resourceType = (ResourceType) attributes.get(RESOURCE_TYPE);
         String transformPath = storageProperties.getTransformPath() + absolutePath;
         Map<String, String> transform = (Map<String, String>) attributes.get(TRANSFORM);
-        if (file.getSize() > 5000) {
+        if (file.getSize() > THRESH_HOLD) {
             handleAssetService.transform(resourceType, storageProperties.getPath() + absolutePath, transformPath,
                     handleAssetService.convertToTransformVariable(transform));
         } else {
