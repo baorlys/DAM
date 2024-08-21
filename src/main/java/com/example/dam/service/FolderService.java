@@ -13,5 +13,5 @@ public interface FolderService {
     FolderDTO shareFolder(String email, UUID folderId, UUID roleId, UUID tenantId);
     void deleteFolder(UUID folderId);
     Folder getFolderById(UUID folderId);
-    List<FolderDTO> getAccessibleFolders(UUID input, String pageSize, String pageNum, String sortBy);
+    List<FolderDTO> getAccessibleFolders(UUID input, int pageSize, int pageNum, String sortBy);
 }
