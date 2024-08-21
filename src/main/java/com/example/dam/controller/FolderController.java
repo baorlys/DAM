@@ -21,8 +21,8 @@ import java.util.UUID;
 public class FolderController {
     private final FolderService folderService;
     @GetMapping("{id}")
-    public ResponseEntity<List<FolderDTO>> getSpaceFolders(@RequestParam(required = false, defaultValue = "0") String pageNum,
-                                                           @RequestParam(required = false, defaultValue = "10") String pageSize,
+    public ResponseEntity<List<FolderDTO>> getSpaceFolders(@RequestParam(required = false, defaultValue = "0") int pageNum,
+                                                           @RequestParam(required = false, defaultValue = "10") int pageSize,
                                                            @RequestParam(required = false) String sortBy,
                                                            @RequestBody @NonNull UUID id
     ) {
