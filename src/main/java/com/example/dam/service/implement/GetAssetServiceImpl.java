@@ -3,15 +3,13 @@ package com.example.dam.service.implement;
 import com.example.dam.config.StorageProperties;
 import com.example.dam.dto.AssetDTO;
 import com.example.dam.enums.ResourceType;
-import com.example.dam.enums.TransformVariable;
 import com.example.dam.exception.NotFoundException;
 import com.example.dam.global.mapper.DamMapper;
+import com.example.dam.global.service.CommonService;
 import com.example.dam.input.ConfigurationInput;
 import com.example.dam.model.Asset;
 import com.example.dam.model.Tenant;
 import com.example.dam.repository.AssetRepository;
-import com.example.dam.repository.FolderRepository;
-import com.example.dam.repository.SpaceRepository;
 import com.example.dam.repository.TenantRepository;
 import com.example.dam.service.AccessService;
 import com.example.dam.service.GetAssetService;
@@ -123,9 +121,7 @@ public class GetAssetServiceImpl implements GetAssetService {
 
     private void checkAccess(String apiKey, String secretKey, String buildPath) throws CredentialException {
         boolean accessible = accessService.isAccessible(apiKey, secretKey, buildPath);
-        if (!accessible) {
-            throw new CredentialException("Asset not accessible");
-        }
+        CommonService.throwIsNotExists(!accessible, "Access denied");
     }
 
     private String getFileExtension(String fileName) {
