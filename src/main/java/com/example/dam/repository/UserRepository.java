@@ -12,6 +12,6 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
     User findUserByEmail(String email);
 
-    @Query("SELECT r FROM User u JOIN u.roles r WHERE u.id = :userId AND r.tenant.id = :tenantId")
+    @Query("SELECT r FROM User u JOIN u.role r WHERE u.id = :userId AND r.tenant.id = :tenantId")
     Role getRoleInTenant(UUID userId, UUID tenantId);
 }

@@ -32,6 +32,8 @@ import java.util.Map;
 public class GetAssetController {
     GetAssetService getAssetService;
 
+    static final String HEADER_VALUE = "inline; filename=";
+
 
     @GetMapping("/{path}")
     public ResponseEntity<AssetDTO> getAsset(@PathVariable String path,
@@ -71,16 +73,13 @@ public class GetAssetController {
 
         MultipartFile multipartFile = getAssetService.getAssetFile(tenantId, type, path, options);
 
-        InputStream inputStream = multipartFile.getInputStream();
-        String contentType = multipartFile.getContentType();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + multipartFile.getOriginalFilename());
-
-        return new ResponseEntity<>(new InputStreamResource(inputStream), headers, HttpStatus.OK);
+        return createResponseEntity(
+                multipartFile.getInputStream(),
+                multipartFile.getContentType(),
+                multipartFile.getOriginalFilename(),
+                multipartFile.getSize()
+        );
     }
-
 
     @GetMapping("/{tenantId}/video/{path}")
     public ResponseEntity<Resource> streamVideo(@PathVariable String tenantId,
@@ -88,6 +87,7 @@ public class GetAssetController {
                                                 @RequestParam @Nullable Map<String, String> options,
                                                 HttpServletRequest request)
             throws IOException, InterruptedException, CredentialException, NotFoundException {
+
         String filePath = getAssetService.getFilePath(tenantId, path);
         File file = new File(filePath);
 
@@ -95,32 +95,49 @@ public class GetAssetController {
         String contentType = getAssetService.getAssetFile(tenantId, "video", path, options).getContentType();
 
         String rangeHeader = request.getHeader(HttpHeaders.RANGE);
+        return createRangeResponseEntity(rangeHeader, fileBytes, contentType, file.getName());
+    }
+
+    private ResponseEntity<InputStreamResource> createResponseEntity(InputStream inputStream, String contentType, String filename, long size) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, HEADER_VALUE + filename);
+        headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(size));
+
+        return new ResponseEntity<>(new InputStreamResource(inputStream), headers, HttpStatus.OK);
+    }
+
+    private ResponseEntity<Resource> createRangeResponseEntity(String rangeHeader, byte[] fileBytes, String contentType, String filename) {
         if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
-            String[] ranges = rangeHeader.substring("bytes=".length()).split("-");
-            long start = Long.parseLong(ranges[0]);
-            long end = ranges.length > 1 ? Long.parseLong(ranges[1]) : fileBytes.length - 1;
-
-            if (start > end || start >= fileBytes.length) {
-                return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE).build();
-            }
-
-            byte[] partialContent = new byte[(int) (end - start + 1)];
-            System.arraycopy(fileBytes, (int) start, partialContent, 0, partialContent.length);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-            headers.add(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileBytes.length);
-            headers.add(HttpHeaders.ACCEPT_RANGES, "bytes");
-            headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(partialContent.length));
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + file.getName());
-
-            return new ResponseEntity<>(new ByteArrayResource(partialContent), headers, HttpStatus.PARTIAL_CONTENT);
+            return createPartialContentResponse(rangeHeader, fileBytes, contentType, filename);
+        } else {
+            return createFullContentResponse(fileBytes, contentType, filename);
         }
+    }
+
+    private ResponseEntity<Resource> createPartialContentResponse(String rangeHeader, byte[] fileBytes, String contentType, String filename) {
+        String[] ranges = rangeHeader.substring("bytes=".length()).split("-");
+        long start = Long.parseLong(ranges[0]);
+        long end = ranges.length > 1 ? Long.parseLong(ranges[1]) : fileBytes.length - 1;
+
+        byte[] partialContent = new byte[(int) (end - start + 1)];
+        System.arraycopy(fileBytes, (int) start, partialContent, 0, partialContent.length);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+        headers.add(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileBytes.length);
+        headers.add(HttpHeaders.ACCEPT_RANGES, "bytes");
+        headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(partialContent.length));
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, HEADER_VALUE + filename);
+
+        return new ResponseEntity<>(new ByteArrayResource(partialContent), headers, HttpStatus.PARTIAL_CONTENT);
+    }
+
+    private ResponseEntity<Resource> createFullContentResponse(byte[] fileBytes, String contentType, String filename) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, contentType);
         headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileBytes.length));
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + file.getName());
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, HEADER_VALUE + filename);
 
         return new ResponseEntity<>(new ByteArrayResource(fileBytes), headers, HttpStatus.OK);
     }

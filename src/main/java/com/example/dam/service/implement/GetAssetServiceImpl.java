@@ -74,19 +74,9 @@ public class GetAssetServiceImpl implements GetAssetService {
         String buildPath = buildFilePath(tenant, path);
 
         Asset asset = assetRepository.findByFilePath(path);
-        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {
-        });
+        Map<String, String> metadata = objectMapper.readValue(asset.getMetadata(), new TypeReference<>() {});
 
-        String outputPath = storageProperties.getTransformPath() + buildPath;
-
-        if (!options.isEmpty()) {
-            ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
-            outputPath = storageProperties.getTransformPath() + path;
-            handleAssetService.transform(resourceType, storageProperties.getPath() + buildPath, outputPath,
-                    handleAssetService.convertToTransformVariable(options));
-
-            asset.setFilePath(outputPath);
-        }
+        String outputPath = deriveOutputPath(path, buildPath, options, metadata);
 
         File file = new File(outputPath);
         String contentType = type + "/" + getFileExtension(asset.getFilePath());
@@ -98,6 +88,27 @@ public class GetAssetServiceImpl implements GetAssetService {
                 contentType,
                 fileInputStream
         );
+    }
+
+    private String deriveOutputPath(String path, String buildPath, Map<String, String> options, Map<String, String> metadata)
+            throws IOException, InterruptedException {
+        String basePath = storageProperties.getTransformPath();
+        String outputPath = basePath + buildPath;
+
+        if (options.isEmpty()) {
+            return outputPath;
+        }
+
+        ResourceType resourceType = ResourceType.valueOf(metadata.get("resource_type").toUpperCase());
+        outputPath = basePath + path;
+        handleAssetService.transform(
+                resourceType,
+                storageProperties.getPath() + buildPath,
+                outputPath,
+                handleAssetService.convertToTransformVariable(options)
+        );
+
+        return outputPath;
     }
 
     private Tenant getTenant(String tenantId) throws NotFoundException {

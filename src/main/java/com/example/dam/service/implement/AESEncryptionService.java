@@ -23,7 +23,6 @@ public class AESEncryptionService implements ApiEncryptionService {
     static final int GCM_IV_LENGTH = 12;
 
     static PrivateConfig privateConfig;
-    static final String ENCRYPTION_KEY = privateConfig.get("ENCRYPTION_KEY");
 
 
 
@@ -35,7 +34,7 @@ public class AESEncryptionService implements ApiEncryptionService {
         secureRandom.nextBytes(iv);
         GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, iv);
 
-        SecretKeySpec secretKeySpec = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), AES);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(privateConfig.get("ENCRYPTION_KEY").getBytes(), AES);
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, parameterSpec);
 
         byte[] cipherText = cipher.doFinal(plainText.getBytes());
@@ -53,7 +52,7 @@ public class AESEncryptionService implements ApiEncryptionService {
         Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
         GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, cipherTextWithIv, 0, GCM_IV_LENGTH);
 
-        SecretKeySpec secretKeySpec = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), AES);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(privateConfig.get("ENCRYPTION_KEY").getBytes(), AES);
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, parameterSpec);
 
         byte[] plainText = cipher.doFinal(cipherTextWithIv, GCM_IV_LENGTH, cipherTextWithIv.length - GCM_IV_LENGTH);
