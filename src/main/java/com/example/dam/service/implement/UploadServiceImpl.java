@@ -2,6 +2,7 @@ package com.example.dam.service.implement;
 
 import com.example.dam.config.StorageProperties;
 import com.example.dam.dto.AssetDTO;
+import com.example.dam.enums.OptionParam;
 import com.example.dam.enums.ResourceType;
 import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.global.service.FileService;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.security.auth.login.CredentialException;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -38,15 +40,7 @@ public class UploadServiceImpl implements UploadService {
     private ObjectMapper objectMapper;
     private HandleAssetService handleAssetService;
     private DamMapper damMapper;
-    private static final String FOLDER = "folder";
-    private static final String SPACE_ID = "space_id";
-    private static final String TYPE = "type";
-    private static final String RESOURCE_TYPE = "resource_type";
-    private static final String TRANSFORM = "transformation";
-    private static final String PUBLIC_ID = "public_id";
-    private static final String DISPLAY_NAME = "display_name";
-    private static final String NOTIFICATION_URL = "notification_url";
-    private static final int THRESH_HOLD = 5000;
+
     @Override
     public AssetDTO upload(AssetInput assetInput, UUID tenantId, String apiKey, String secretKey)
             throws IOException, CredentialException, InterruptedException {
@@ -59,8 +53,8 @@ public class UploadServiceImpl implements UploadService {
         Credential credential = validateCredential(apiKey, secretKey);
 
         // Handle folder & file name
-        String fName = (String) attributes.get(FOLDER);
-        Space space = getSpaceById(attributes.get(SPACE_ID));
+        String fName = (String) attributes.get(OptionParam.FOLDER);
+        Space space = getSpaceById(attributes.get(OptionParam.SPACE_ID));
         String originName = file.getOriginalFilename();
         Folder folder = findOrCreateFolder(tenant, credential.getUser(), space, fName);
         String path = FileService.buildRelativePath(Objects.requireNonNull(originName));
@@ -81,6 +75,8 @@ public class UploadServiceImpl implements UploadService {
                 .publicId(UUID.randomUUID().toString())
                 .filePath(path)
                 .thumbnailPath(thumbnail)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
         return damMapper.mapAsset(assetRepository.save(asset));
     }
@@ -97,43 +93,49 @@ public class UploadServiceImpl implements UploadService {
     private void saveAndProcessFile(MultipartFile file, String absolutePath, Map<String, Object> attributes, String thumbnail)
             throws IOException, InterruptedException {
         FileService.saveFile(file, absolutePath, storageProperties.getPath());
-        ResourceType resourceType = (ResourceType) attributes.get(RESOURCE_TYPE);
+        ResourceType resourceType = (ResourceType) attributes.get(OptionParam.RESOURCE_TYPE);
         String transformPath = storageProperties.getTransformPath() + absolutePath;
-        Map<String, String> transform = (Map<String, String>) attributes.get(TRANSFORM);
-        if (file.getSize() > THRESH_HOLD) {
+        Map<String, String> transform = (Map<String, String>) attributes.get(OptionParam.TRANSFORM);
+        if (file.getSize() > OptionParam.THRESH_HOLD && resourceType == ResourceType.IMAGE) {
             handleAssetService.transform(resourceType, storageProperties.getPath() + absolutePath, transformPath,
                     handleAssetService.convertToTransformVariable(transform));
         } else {
             FileService.saveFile(file, "", transformPath);
         }
-        handleAssetService.generateThumbnail(resourceType, storageProperties.getPath() + absolutePath, thumbnail, 300);
+        handleAssetService.generateThumbnail(resourceType, storageProperties.getPath() + absolutePath,
+                thumbnail, 300);
     }
 
 
     private String handleMetadata(Map<String, Object> data, MultipartFile file) throws JsonProcessingException {
-        data.put("size", file.getSize());
-        data.put("origin_name", file.getOriginalFilename());
-        data.put("extension", FileService.extractExtension(Objects.requireNonNull(file.getOriginalFilename())));
-        data.remove(SPACE_ID);
-        data.remove(FOLDER);
-        data.remove(TRANSFORM);
+        data.put(OptionParam.SIZE, file.getSize());
+        data.put(OptionParam.ORIGIN_NAME, file.getOriginalFilename());
+        data.put(OptionParam.EXTENSION, FileService.extractExtension(Objects.requireNonNull(file.getOriginalFilename())));
+        data.remove(OptionParam.SPACE_ID);
+        data.remove(OptionParam.FOLDER);
+        data.remove(OptionParam.TRANSFORM);
         return objectMapper.writeValueAsString(data);
     }
 
     private Map<String, Object> buildUploadParams(Map<String, String> options) throws JsonProcessingException {
-        if (options == null) {
-            options = Collections.emptyMap();
-        }
+        Map<String, String> finalOptions = Optional.ofNullable(options).orElse(Collections.emptyMap());
         Map<String, Object> params = new HashMap<>();
-        params.put(PUBLIC_ID, options.get(PUBLIC_ID));
-        params.put(SPACE_ID, options.get(SPACE_ID));
-        params.put(FOLDER, options.get(FOLDER));
-        params.put(TYPE, options.get(TYPE));
-        params.put(RESOURCE_TYPE, CommonService.findResourceType(options.get(RESOURCE_TYPE)));
-        params.put(DISPLAY_NAME, options.get(DISPLAY_NAME));
-        params.put(NOTIFICATION_URL, options.get(NOTIFICATION_URL));
-        params.put(TRANSFORM, objectMapper.readValue(options.get(TRANSFORM), Map.class));
+        params.put(OptionParam.PUBLIC_ID, finalOptions.get(OptionParam.PUBLIC_ID));
+        params.put(OptionParam.SPACE_ID, finalOptions.get(OptionParam.SPACE_ID));
+        params.put(OptionParam.FOLDER, finalOptions.get(OptionParam.FOLDER));
+        params.put(OptionParam.TYPE, finalOptions.get(OptionParam.TYPE));
+        params.put(OptionParam.RESOURCE_TYPE, CommonService.findResourceType(finalOptions.get(OptionParam.RESOURCE_TYPE)));
+        params.put(OptionParam.DISPLAY_NAME, finalOptions.get(OptionParam.DISPLAY_NAME));
+        params.put(OptionParam.NOTIFICATION_URL, finalOptions.get(OptionParam.NOTIFICATION_URL));
+        params.put(OptionParam.TRANSFORM, convertTransform(finalOptions.get(OptionParam.TRANSFORM)));
         return params;
+    }
+
+    private Map convertTransform(String transform) throws JsonProcessingException {
+        if (transform == null) {
+            return Collections.emptyMap();
+        }
+        return objectMapper.readValue(transform, Map.class);
     }
 
 
