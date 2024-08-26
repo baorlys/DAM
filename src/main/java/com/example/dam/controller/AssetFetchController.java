@@ -1,12 +1,10 @@
 package com.example.dam.controller;
 
-import com.example.dam.dto.AssetDTO;
+import com.example.dam.enums.AssetType;
 import com.example.dam.exception.NotFoundException;
-import com.example.dam.input.ConfigurationInput;
-import com.example.dam.service.GetAssetService;
+import com.example.dam.service.AssetFetchService;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
@@ -29,25 +27,10 @@ import java.util.Map;
 @RequestMapping("api/get-assets")
 @AllArgsConstructor
 @Validated
-public class GetAssetController {
-    GetAssetService getAssetService;
+public class AssetFetchController {
+    AssetFetchService assetFetchService;
 
     static final String HEADER_VALUE = "inline; filename=";
-
-
-    @GetMapping("/{path}")
-    public ResponseEntity<AssetDTO> getAsset(@PathVariable String path,
-                                             @RequestParam @Nullable Map<String, String> options,
-                                             @RequestHeader("X-Tenant-ID") @NotEmpty String tenantId,
-                                             @RequestHeader("X-API-Key") @NotEmpty String apiKey,
-                                             @RequestHeader("X-Secret-Key") @NotEmpty String secretKey)
-            throws CredentialException, IOException, InterruptedException, NotFoundException {
-        ConfigurationInput key = new ConfigurationInput();
-        key.setTenantId(tenantId);
-        key.setApiKey(apiKey);
-        key.setSecretKey(secretKey);
-        return ResponseEntity.ok(getAssetService.getAsset(key, path, options));
-    }
 
     @GetMapping("/{tenantId}/thumbnail/{path}")
     public ResponseEntity<InputStreamResource> getThumbnailFile(@PathVariable String tenantId,
@@ -55,7 +38,7 @@ public class GetAssetController {
                                                                 @RequestParam @Nullable Map<String, String> options)
             throws CredentialException, IOException, InterruptedException, NotFoundException {
 
-        return getFile(tenantId, "thumbnail", path, options);
+        return getFile(tenantId, AssetType.THUMBNAIL.getValue(), path, options);
     }
 
     @GetMapping("/{tenantId}/image/{path}")
@@ -64,14 +47,16 @@ public class GetAssetController {
                                                             @RequestParam @Nullable Map<String, String> options)
             throws CredentialException, IOException, InterruptedException, NotFoundException {
 
-        return getFile(tenantId, "image", path, options);
+        return getFile(tenantId, AssetType.IMAGE.getValue(), path, options);
     }
 
-    private ResponseEntity<InputStreamResource> getFile(String tenantId, String type, String path,
+    private ResponseEntity<InputStreamResource> getFile(String tenantId,
+                                                        String type,
+                                                        String path,
                                                         @Nullable Map<String, String> options)
             throws CredentialException, IOException, InterruptedException, NotFoundException {
 
-        MultipartFile multipartFile = getAssetService.getAssetFile(tenantId, type, path, options);
+        MultipartFile multipartFile = assetFetchService.getAssetFile(tenantId, type, path, options);
 
         return createResponseEntity(
                 multipartFile.getInputStream(),
@@ -88,17 +73,22 @@ public class GetAssetController {
                                                 HttpServletRequest request)
             throws IOException, InterruptedException, CredentialException, NotFoundException {
 
-        String filePath = getAssetService.getFilePath(tenantId, path);
+        String filePath = assetFetchService.getFilePath(tenantId, path);
         File file = new File(filePath);
 
         byte[] fileBytes = Files.readAllBytes(file.toPath());
-        String contentType = getAssetService.getAssetFile(tenantId, "video", path, options).getContentType();
+        String contentType = assetFetchService
+                .getAssetFile(tenantId, AssetType.VIDEO.getValue(), path, options)
+                .getContentType();
 
         String rangeHeader = request.getHeader(HttpHeaders.RANGE);
         return createRangeResponseEntity(rangeHeader, fileBytes, contentType, file.getName());
     }
 
-    private ResponseEntity<InputStreamResource> createResponseEntity(InputStream inputStream, String contentType, String filename, long size) {
+    private ResponseEntity<InputStreamResource> createResponseEntity(InputStream inputStream,
+                                                                     String contentType,
+                                                                     String filename,
+                                                                     long size) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, contentType);
         headers.add(HttpHeaders.CONTENT_DISPOSITION, HEADER_VALUE + filename);
@@ -107,15 +97,21 @@ public class GetAssetController {
         return new ResponseEntity<>(new InputStreamResource(inputStream), headers, HttpStatus.OK);
     }
 
-    private ResponseEntity<Resource> createRangeResponseEntity(String rangeHeader, byte[] fileBytes, String contentType, String filename) {
+    private ResponseEntity<Resource> createRangeResponseEntity(String rangeHeader,
+                                                               byte[] fileBytes,
+                                                               String contentType,
+                                                               String filename) {
         if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
             return createPartialContentResponse(rangeHeader, fileBytes, contentType, filename);
-        } else {
-            return createFullContentResponse(fileBytes, contentType, filename);
         }
+        return createFullContentResponse(fileBytes, contentType, filename);
     }
 
-    private ResponseEntity<Resource> createPartialContentResponse(String rangeHeader, byte[] fileBytes, String contentType, String filename) {
+    // Handle streaming of video files
+    private ResponseEntity<Resource> createPartialContentResponse(String rangeHeader,
+                                                                  byte[] fileBytes,
+                                                                  String contentType,
+                                                                  String filename) {
         String[] ranges = rangeHeader.substring("bytes=".length()).split("-");
         long start = Long.parseLong(ranges[0]);
         long end = ranges.length > 1 ? Long.parseLong(ranges[1]) : fileBytes.length - 1;
@@ -133,7 +129,9 @@ public class GetAssetController {
         return new ResponseEntity<>(new ByteArrayResource(partialContent), headers, HttpStatus.PARTIAL_CONTENT);
     }
 
-    private ResponseEntity<Resource> createFullContentResponse(byte[] fileBytes, String contentType, String filename) {
+    private ResponseEntity<Resource> createFullContentResponse(byte[] fileBytes,
+                                                               String contentType,
+                                                               String filename) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, contentType);
         headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileBytes.length));

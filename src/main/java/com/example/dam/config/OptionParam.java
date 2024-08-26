@@ -1,4 +1,4 @@
-package com.example.dam.enums;
+package com.example.dam.config;
 
 public class OptionParam {
     private OptionParam() {

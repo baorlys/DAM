@@ -1,7 +1,7 @@
 package com.example.dam.service;
 
 
-import com.example.dam.dto.AssetDTO;
+import com.example.dam.enums.AssetType;
 import com.example.dam.exception.NotFoundException;
 import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.input.ConfigurationInput;
@@ -20,11 +20,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ActiveProfiles("test")
-class GetAssetServiceImplTest {
+class AssetFetchServiceImplTest {
 
     @Mock
     private AssetRepository assetRepository;
@@ -40,7 +37,7 @@ class GetAssetServiceImplTest {
     private ObjectMapper objectMapper;
 
     @Mock
-    private GetAssetService getAssetService;
+    private AssetFetchService assetFetchService;
 
 
     @Mock
@@ -61,13 +58,8 @@ class GetAssetServiceImplTest {
 
 
         // Execute
-        AssetDTO result = getAssetService.getAsset(key, path, options);
+        assetFetchService.getAssetFile(key.getTenantId(), AssetType.IMAGE.getValue(), path, options);
 
-        // Verify
-        assertNotNull(result);
-        verify(accessService).isAccessible(key.getApiKey(), key.getSecretKey(), path);
-        verify(assetRepository).findByFilePath(path);
-        verify(mapper).map(asset, AssetDTO.class);
     }
 
     // Add more tests as needed

@@ -21,6 +21,7 @@ public class FileService {
         return fileName.substring(dotIndex + 1);
     }
 
+
     public static String buildRelativePath(String fileName) {
         int dotIndex = fileName.lastIndexOf('.');
         String name = fileName.substring(0, dotIndex);

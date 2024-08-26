@@ -3,6 +3,7 @@ package com.example.dam.service.implement;
 import com.example.dam.dto.AssetDTO;
 import com.example.dam.dto.TenantDTO;
 import com.example.dam.exception.ExistsRecord;
+import com.example.dam.exception.NotFoundException;
 import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.global.service.CommonService;
 import com.example.dam.model.Tenant;
@@ -15,7 +16,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -40,25 +40,26 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public void deleteTenant(String tenantId) {
-        Tenant readyDel = tenantRepository.findById(UUID.fromString(tenantId)).orElse(null);
-        CommonService.throwNotFound(readyDel, "Tenant not found");
-
-        Objects.requireNonNull(readyDel);
+    public void deleteTenant(String tenantId) throws NotFoundException {
+        Tenant readyDel = getTenant(tenantId);
         tenantRepository.delete(readyDel);
     }
 
     @Override
-    public TenantDTO switchTenant(String tenantId) {
-        Tenant tenant = tenantRepository.findById(UUID.fromString(tenantId)).orElse(null);
-        CommonService.throwNotFound(tenant, "Tenant not found");
+    public TenantDTO switchTenant(String tenantId) throws NotFoundException {
+        Tenant tenant = getTenant(tenantId);
 
-        Objects.requireNonNull(tenant);
         AssetDTO[] assets = damMapper.map(assetRepository.findAllByTenantId(tenant.getId()), AssetDTO[].class);
         TenantDTO tenantDTO = damMapper.map(tenant, TenantDTO.class);
         tenantDTO.setAssets(List.of(assets));
 
         return tenantDTO;
+    }
+
+    @Override
+    public Tenant getTenant(String tenantId) throws NotFoundException {
+        return tenantRepository.findById(UUID.fromString(tenantId))
+                .orElseThrow(() -> new NotFoundException("Tenant not found"));
     }
 
     boolean isTenantExist(String tenantName) {

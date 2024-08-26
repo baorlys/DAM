@@ -2,7 +2,7 @@ package com.example.dam.service.implement;
 
 import com.example.dam.config.StorageProperties;
 import com.example.dam.dto.AssetDTO;
-import com.example.dam.enums.OptionParam;
+import com.example.dam.config.OptionParam;
 import com.example.dam.enums.ResourceType;
 import com.example.dam.global.mapper.DamMapper;
 import com.example.dam.global.service.FileService;

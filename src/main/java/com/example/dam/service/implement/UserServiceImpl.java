@@ -32,7 +32,14 @@ public class UserServiceImpl implements UserService {
     UserFolderRepository userFolderRepository;
 
 
-
+    public Role getRoleUserIn(UUID userId, TargetLevel level, UUID targetId) {
+        Map<TargetLevel, Supplier<Role>> roleMap = Map.of(
+                TargetLevel.TENANT, () -> userRepository.getRoleInTenant(userId, targetId),
+                TargetLevel.SPACE, () -> userSpaceRepository.getRoleInSpace(userId, targetId),
+                TargetLevel.FOLDER, () -> userFolderRepository.getRoleInFolder(userId, targetId)
+        );
+        return roleMap.get(level).get();
+    }
 
     @Override
     public User registerUser(User user) {
@@ -67,20 +74,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteCredential(UUID credentialId) {
-
     }
 
     @Override
     public void updateCredential(UUID credentialId, Credential credential) {
-
     }
 
-    public Role getRoleUserIn(UUID userId, TargetLevel level, UUID targetId) {
-        Map<TargetLevel, Supplier<Role>> roleMap = Map.of(
-                TargetLevel.TENANT, () -> userRepository.getRoleInTenant(userId, targetId),
-                TargetLevel.SPACE, () -> userSpaceRepository.getRoleInSpace(userId, targetId),
-                TargetLevel.FOLDER, () -> userFolderRepository.getRoleInFolder(userId, targetId)
-        );
-        return roleMap.get(level).get();
-    }
+
 }
